@@ -23,7 +23,8 @@ export const CONFERMA_EMAIL = false;
  *  («hook») e public/candidatura.js lo legge da lì. VUOTO = modalità prova: niente parte in rete, e il modulo lo
  *  dice con un avviso su qualunque indirizzo. Il build si ferma se il sito è pubblico (`SITO_NON_PUBBLICO = false`)
  *  e questo è ancora vuoto: una candidatura non deve poter sparire nel nulla. */
-export const WEBHOOK_CANDIDATURA = '';
+export const WEBHOOK_CANDIDATURA =
+  'https://services.leadconnectorhq.com/hooks/qU2bNH64LmanhTwuSwhA/webhook-trigger/2fad1965-3eab-42ed-b60c-9e9c5a29f2fe';
 
 /** Coda aggiunta agli indirizzi di CSS e JS in public/ per svuotare la cache: cambia da sola a ogni build. */
 export const VERSIONE = new Date().toISOString().slice(0, 16).replace(/\D/g, '');

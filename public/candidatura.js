@@ -71,7 +71,7 @@
   var D;
   try { D = JSON.parse(fonteDati.textContent); } catch (e) { guasto('JSON dei passi non valido', e); return; }
   var TIPI = ['singola', 'multipla', 'testo', 'testo_lungo', 'contatti', 'spunta'];
-  var RISERVATE = ['fonte', 'pagina', 'inviata_il', 'versione_questionario', 'riepilogo', 'first_name', 'last_name', 'email', 'phone', 'maggiorenne', 'consenso_privacy', 'consenso_lettere'];
+  var RISERVATE = ['fonte', 'pagina', 'inviata_il', 'versione_questionario', 'riepilogo', 'riepilogo_html', 'first_name', 'last_name', 'email', 'phone', 'maggiorenne', 'consenso_privacy', 'consenso_lettere'];
   var usate = {};
   var PASSI = (D.passi || []).filter(function (p) {
     var ok = p && p.chiave && p.titolo && TIPI.indexOf(p.tipo) >= 0;
@@ -432,6 +432,10 @@
       }
     });
     d.riepilogo = righe.join('\n').replace(/\u2060/g, '');
+    /* lo stesso riepilogo per l'email e la nota in HighLevel, dove gli a capo semplici spariscono:
+       testo reso innocuo (niente HTML scritto da chi si candida), una riga vuota fra una risposta e l'altra */
+    var sicuro = function (t) { return String(t).replace(/\u2060/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\r?\n/g, '<br>'); };
+    d.riepilogo_html = (d.phone ? ['Telefono: ' + d.phone] : []).concat(righe).map(sicuro).join('<br><br>');
     return d;
   }
   function fine(d) {
