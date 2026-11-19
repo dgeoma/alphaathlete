@@ -21,9 +21,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: withastro/action@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+      - run: npm ci
+      # base_path è «/alphaathlete» finché il sito sta su utente.github.io/alphaathlete, vuoto col dominio collegato
+      - id: pages
+        uses: actions/configure-pages@v5
+      - run: npm run build
+      # Solo senza dominio: antepone la sottocartella agli indirizzi interni, altrimenti stili e immagini non si trovano.
+      - run: node scripts/prefisso-anteprima.mjs "${{ steps.pages.outputs.base_path }}"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
   deploy:
     needs: build
     runs-on: ubuntu-latest
