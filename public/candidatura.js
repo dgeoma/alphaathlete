@@ -485,7 +485,11 @@
     var ctl = 'AbortController' in window ? new AbortController() : null;
     var stop = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
     fetch(HOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d), signal: ctl ? ctl.signal : undefined })
-      .then(function (r) { clearTimeout(stop); if (!r.ok) throw new Error(r.status); try { sessionStorage.removeItem('candidatura.prova'); } catch (e3) {} fine(d); })
+      .then(function (r) { clearTimeout(stop); if (!r.ok) throw new Error(r.status); return r.text(); })
+      /* HighLevel risponde 200 anche quando il workflow è in bozza («test request received»): in quel caso la
+         candidatura NON è entrata, quindi non si va a /grazie/. Se un giorno il workflow viene spento, chi si
+         candida vede «non riuscito» invece di un grazie falso. */
+      .then(function (t) { if (/test request/i.test(t || '')) throw new Error('workflow in bozza'); try { sessionStorage.removeItem('candidatura.prova'); } catch (e3) {} fine(d); })
       .catch(function () { clearTimeout(stop); nonRiuscito(); });
   }
 
