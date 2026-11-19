@@ -1,0 +1,23 @@
+---
+// Pagina non trovata. Copy v2 §6.2.
+// Menu col bottone che porta al questionario della home; in pagina un link di testo, non una seconda pillola.
+// Stessa impaginazione di /grazie/ (riquadro al centro, senza robot) invece di `page-hero`: quattro righe in alto
+// a sinistra lasciavano mezzo schermo vuoto.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Riquadro from '../components/Riquadro.astro';
+import FooterSito from '../components/FooterSito.astro';
+import { META } from '../config';
+---
+<Base titolo="Pagina non trovata · Alpha Athlete" descrizione={META.descrizione} ogTitolo={META.ogTitolo} ogDescrizione={META.ogDescrizione} ogImmagine={META.ogImmagine} ogImmagineAlt={META.ogImmagineAlt} percorso="/404" noindex>
+  <Nav slot="nav" logoHref="/" cta={{ href: '/#candidatura', label: 'Candidati' }} />
+  <Riquadro titoloId="nontrovata-t" class="riquadro--pagina riquadro--centro">
+    <div class="servizio">
+      <p class="eyebrow">Errore 404</p>
+      <h1 id="nontrovata-t">Questa pagina non c’è.</h1>
+      <p>Il link può essere cambiato, oppure nell’indirizzo c’è un errore di battitura.</p>
+      <div class="cta-row"><a class="link-arrow" href="/">Torna alla pagina di Alpha Athlete</a></div>
+    </div>
+  </Riquadro>
+  <FooterSito slot="footer" />
+</Base>

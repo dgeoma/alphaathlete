@@ -1,0 +1,25 @@
+---
+// Chiusura: la scena larga dei costruttori (tempio-basso) che emerge dal crema, con una frase sopra
+// e la greca sottile sotto. Slot: default = la frase.
+interface Props {
+  id?: string;
+  etichetta?: string;
+  alt?: string;
+  /** greca sotto la scena (default: sì) */
+  greca?: boolean;
+}
+const {
+  id,
+  etichetta = 'I costruttori',
+  alt = 'Un robot con la corona d’alloro studia il disegno del tempio insieme a un altro robot, mentre altri due portano un blocco di marmo. Sullo sfondo, un paese greco e il mare.',
+  greca = true,
+} = Astro.props;
+---
+<section class="finale" id={id} aria-label={etichetta}>
+  {Astro.slots.has('default') && <p class="finale__frase reveal"><slot /></p>}
+  <picture class="finale__pic">
+    <source media="(max-width: 700px)" srcset="/assets/tempio/tempio-basso-m-900.webp 900w, /assets/tempio/tempio-basso-m-1300.webp 1300w, /assets/tempio/tempio-basso-m-1800.webp 1800w" sizes="162vw">
+    <img class="finale__scena" src="/assets/tempio/tempio-basso-1920.webp" srcset="/assets/tempio/tempio-basso-1280.webp 1280w, /assets/tempio/tempio-basso-1920.webp 1920w, /assets/tempio/tempio-basso-2880.webp 2880w, /assets/tempio/tempio-basso-3840.webp 3840w" sizes="100vw" width="3840" height="2052" alt={alt} loading="lazy">
+  </picture>
+  {greca && <div class="greca" aria-hidden="true"></div>}
+</section>

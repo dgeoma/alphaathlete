@@ -1,0 +1,17 @@
+---
+// Riquadro chiaro, grande, col bordo oro. Con `sale` sale sopra il fondo dell'apertura (va messo subito dopo
+// <Apertura>); con `robot` ha il robot che indica appoggiato sul bordo in alto a destra.
+// `class` aggiunge una classe alla sezione (es. "riquadro--pagina": il riquadro riempie il primo schermo,
+// per le pagine corte come /grazie/).
+// Slot: default (contenuto del riquadro).
+interface Props { id?: string; sale?: boolean; robot?: boolean; etichetta?: string; titoloId?: string; class?: string }
+const { id, sale = false, robot = false, etichetta, titoloId, class: classe } = Astro.props;
+---
+<section class:list={['riquadro', { 'riquadro--piano': !sale }, classe]} id={id} aria-label={etichetta} aria-labelledby={titoloId}>
+  <div class="wrap">
+    <div class="riquadro__box">
+      {robot && <img class="robot-indica" src="/assets/tempio/robot-indica.webp" width="161" height="164" alt="" aria-hidden="true" loading="lazy">}
+      <slot />
+    </div>
+  </div>
+</section>

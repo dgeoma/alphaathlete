@@ -1,0 +1,7 @@
+---
+// Il monogramma Λ di Alpha Athlete, da solo: è il tracciato del logo originale
+// (_non-online/assets/logo/alpha-athlete.svg, livello «a logo»), senza la scritta. Prende il colore del testo.
+interface Props { class?: string; titolo?: string }
+const { class: classe, titolo } = Astro.props;
+---
+<svg class={classe} viewBox="920 0 1967 2035" fill="currentColor" role={titolo ? 'img' : undefined} aria-label={titolo} aria-hidden={titolo ? undefined : 'true'} focusable="false"><path d="M2338 1773c19,52 35,105 58,155 9,19 8,45 -15,62 -13,14 -12,43 10,44l472 0c31,4 32,-37 0,-39l-74 0c-106,-27 -156,-118 -204,-212l-677 -1782 -62 0 -639 1795c-44,122 -88,173 -198,201l-65 0c-38,1 -24,39 0,36l519 0c28,-3 28,-28 0,-33 -32,-3 -72,-15 -98,-33 -35,-24 -31,-74 -21,-116 167,-493 328,-986 491,-1480l504 1402z"/></svg>

@@ -1,0 +1,88 @@
+---
+// Questionario di candidatura a passi, dentro un riquadro. I passi non sono nel codice: si passano in `dati`
+// (schema in testa a public/candidatura.js) e finiscono in pagina come JSON, da dove li legge il motore.
+// Serve css={['candidatura']} e js={['candidatura']} nel layout. Il webhook si mette in src/config.ts
+// (WEBHOOK_CANDIDATURA): il componente lo passa nel JSON («hook»). Se il sito è pubblico e il webhook è vuoto,
+// il build si ferma.
+// L'ancora è sempre #candidatura: ci puntano il bottone del menu e main.js.
+//
+// Finché LETTERE_ATTIVE (src/config.ts) è false, il componente toglie la spunta delle lettere dal passo
+// «contatti» (`lettere: false`), qualunque cosa ci sia scritta in `dati`.
+//
+// Slot: etichetta (riga piccola sopra il titolo) · titolo (dentro <h2>) · nota (riga piccola sotto il modulo)
+//       · senza-js (cosa leggere se JavaScript è spento o il modulo non parte: di solito un recapito)
+import Riquadro from './Riquadro.astro';
+import { LETTERE_ATTIVE, SITO_NON_PUBBLICO, WEBHOOK_CANDIDATURA } from '../config';
+interface Extra {
+  chiave: string;
+  etichetta: string;
+  /** caratteri al massimo (se manca: 200) */
+  max?: number;
+  segnaposto?: string;
+}
+interface Passo {
+  chiave: string;
+  titolo: string;
+  aiuto?: string;
+  tipo: 'singola' | 'multipla' | 'testo' | 'testo_lungo' | 'contatti' | 'spunta';
+  /** riga piccola sopra l'avanzamento */
+  gruppo?: string;
+  /** riga di passaggio sopra il titolo */
+  sopra?: string;
+  /** sostituisce il messaggio generico («scelta», «obbligatorio») di questo passo */
+  errore?: string;
+  opzioni?: (string | { valore?: string; etichetta: string; nota?: string })[];
+  obbligatorio?: boolean;
+  max?: number;
+  min?: number;
+  segnaposto?: string;
+  /** solo «testo», «spunta» e «contatti»: secondo campo, sempre facoltativo (nei contatti: dopo il telefono) */
+  extra?: Extra;
+  /** solo «spunta»: elenco numerato sopra la casella */
+  elenco?: string[];
+  /** solo «spunta»: link che si apre in un'altra scheda */
+  link?: { href: string; testo: string };
+  /** solo «contatti» */
+  etichette?: Record<string, string>;
+  maggiorenne?: { testo?: string } | boolean;
+  privacy?: { testo?: string; link?: string; link_testo?: string };
+  lettere?: { testo?: string } | false;
+}
+interface Dati {
+  /** parte nel payload come `versione_questionario` */
+  versione?: string;
+  intro?: string;
+  passi: Passo[];
+  etichette?: Record<string, string>;
+  invio?: Record<string, string>;
+  errori?: Record<string, string>;
+}
+interface Props {
+  dati: Dati;
+  /** true = il riquadro sale sopra l'apertura (va messo subito dopo <Apertura>) */
+  sale?: boolean;
+  /** robot che indica appoggiato sul bordo (default: sì) */
+  robot?: boolean;
+  /** true = questionario di prova (pagina di lavoro /kit/): il webhook non gli arriva MAI, nemmeno quando esiste */
+  prova?: boolean;
+}
+const { dati, sale = false, robot = true, prova = false } = Astro.props;
+const passi = dati.passi.map((p) => (p.tipo === 'contatti' && !LETTERE_ATTIVE ? { ...p, lettere: false as const } : p));
+const hook = prova ? '' : WEBHOOK_CANDIDATURA.trim();
+if (!prova && !SITO_NON_PUBBLICO && !hook) {
+  throw new Error('Il sito è pubblico (SITO_NON_PUBBLICO = false) ma WEBHOOK_CANDIDATURA in src/config.ts è vuoto: le candidature non arriverebbero a nessuno.');
+}
+const json = JSON.stringify({ ...dati, passi, hook }).replace(/</g, '\\u003c');
+---
+<Riquadro id="candidatura" sale={sale} robot={robot} titoloId="candidatura-t">
+  <div class="riquadro__head">
+    {Astro.slots.has('etichetta') && <p class="eyebrow"><slot name="etichetta" /></p>}
+    <h2 id="candidatura-t" tabindex="-1" data-candidatura-titolo><slot name="titolo" /></h2>
+    <p class="riquadro__intro" data-candidatura-intro>{dati.intro}</p>
+  </div>
+  <!-- il testo di ripiego sta dentro il modulo: il motore lo sostituisce col primo passo; resta visibile senza
+       JavaScript o se il motore non parte -->
+  <div class="cand" id="candidatura-modulo"><p class="riquadro__nota cand__ripiego"><slot name="senza-js">Il questionario ha bisogno di JavaScript.</slot></p></div>
+  {Astro.slots.has('nota') && <p class="riquadro__nota"><slot name="nota" /></p>}
+  <script is:inline type="application/json" id="candidatura-dati" set:html={json}></script>
+</Riquadro>

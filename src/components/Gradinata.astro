@@ -1,0 +1,92 @@
+---
+// Scena predefinita del palco a tappe: la gradinata del tempio vista di fronte.
+// n gradini di marmo salgono verso il frontone con la porta; il gradino k (1 = il più basso) è d'oro e un robot
+// ci sta sopra; i gradini già saliti tengono un filo d'oro sul bordo; all'ultima tappa la porta è illuminata.
+// Solo SVG e i robot esistenti: niente JavaScript, si ridimensiona da sola. Colori e movimento in public/tappe.css.
+//   numero = il numero romano scritto sul gradino d'oro (palco delle tappe);
+//   numeri = un numero per OGNI gradino, dal basso (es. ['I','II','III']): il disegno diventa la mappa dei passi
+//            (#come-si-entra). Se c'è, `numero` non serve.
+// I robot stanno SUL gradino, non incollati: stessa taglia di testa per tutti, un'ombra sotto i piedi, e i gradini
+// hanno un filo di materia (luce in alto e giunti dei blocchi), come il palco del metodo di georgematei.com.
+export type Robot = 'indica' | 'portatori' | 'progetto' | 'nessuno';
+interface Props { n: number; k: number; robot?: Robot; numero?: string; numeri?: string[] }
+const { n, k, robot = k % 2 ? 'indica' : 'portatori', numero = '', numeri } = Astro.props;
+
+const CX = 320, Y_BASE = 474, Y_CIMA = 262;
+const h = (Y_BASE - Y_CIMA) / n;                                           // altezza di un gradino
+const mezza = (i: number) => 300 - (i - 1) * (120 / Math.max(1, n - 1));   // mezza larghezza del gradino i: 300 in basso, 180 in cima
+const su = (i: number) => Y_BASE - i * h;                                  // quota del bordo alto del gradino i
+const dallAlto = Array.from({ length: n }, (_, j) => n - j);
+const r1 = (x: number) => Math.round(x * 10) / 10;
+
+// I robot: misure nella scena (640×490), da che parte guardano nell'immagine, di quanto affondano nel gradino,
+// quanto è larga l'ombra sotto i piedi. «indica» è un mezzobusto: disegnato a 60×61 ha la testa grande come gli
+// altri, che sono a figura intera (a 96×98 la testa veniva il doppio e copriva una colonna).
+const ROBOT = {
+  indica: { file: 'robot-indica', w: 60, h: 61, guarda: 'sx', affonda: 0, ombra: 0.4 },
+  portatori: { file: 'robot-portatori', w: 150, h: 102, guarda: '', affonda: 3, ombra: 0.44 },
+  progetto: { file: 'robot-progetto', w: 106, h: 102, guarda: 'dx', affonda: 3, ombra: 0.36 },
+} as const;
+const r = robot === 'nessuno' ? null : ROBOT[robot];
+const lato = k % 2 ? -1 : 1;                                               // a sinistra sulle tappe dispari, a destra sulle pari
+const rcx = r ? Math.max(r.w / 2 + 8, Math.min(640 - r.w / 2 - 8, CX + lato * mezza(k) * 0.52)) : 0;
+const rx = r ? r1(rcx - r.w / 2) : 0;
+const ry = r ? r1(su(k) - r.h + r.affonda) : 0;
+// il robot guarda sempre verso il centro della gradinata: se serve, l'immagine si specchia
+const specchia = r ? (lato < 0 && r.guarda === 'sx') || (lato > 0 && r.guarda === 'dx') : false;
+const fs = r1(Math.min(24, h * 0.6));
+const colonne = [206, 268, 372, 434];
+// giunti verticali dei blocchi: sfalsati da un gradino all'altro, mai al centro (lì sta il numero)
+const giunti = (i: number) => (i % 2 ? [80, 160, 240] : [40, 120, 200, 280]).filter((d) => d < mezza(i) - 14).flatMap((d) => [CX - d, CX + d]);
+const idLuce = `grad-luce-${n}-${k}`;
+const numeroDi = (i: number) => (numeri ? numeri[i - 1] ?? '' : i === k ? numero : '');
+---
+<svg class="grad" viewBox="0 0 640 490" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id={idLuce} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffdf8" stop-opacity="0.55" /><stop offset="0.7" stop-color="#fffdf8" stop-opacity="0" /></linearGradient>
+  </defs>
+  <!-- il tempio: cella, porta, colonne, architrave, fregio blu, cornice, frontone col filo d'oro -->
+  <g transform="translate(320 262) scale(1.12) translate(-320 -262)">
+  <rect class="grad__ombra" x="196" y="142" width="248" height="120" />
+  <rect class:list={['grad__porta', { 'is-aperta': k === n }]} x="292" y="160" width="56" height="102" />
+  {colonne.map((c) => (
+    <g>
+      <rect class="grad__luce" x={c - 12} y="150" width="24" height="106" />
+      <path class="grad__riga" d={`M${c - 4} 152V254M${c + 4} 152V254`} fill="none" />
+      <rect class="grad__marmo" x={c - 16} y="142" width="32" height="8" />
+      <rect class="grad__marmo" x={c - 15} y="256" width="30" height="6" />
+    </g>
+  ))}
+  <rect class="grad__marmo" x="184" y="128" width="272" height="14" />
+  <rect class="grad__fregio" x="184" y="110" width="272" height="18" />
+  <rect class="grad__luce" x="176" y="102" width="288" height="8" />
+  <polygon class="grad__marmo" points="176,102 320,46 464,102" />
+  <polygon class="grad__mezzo" points="208,97 320,54 432,97" />
+  <polyline class="grad__filo" points="176,102 320,46 464,102" />
+  </g>
+
+  <!-- i gradini, dall'alto al basso; il robot sta dietro il bordo del suo gradino -->
+  {dallAlto.map((i) => (
+    <Fragment>
+      {i === k && r && (
+        <g class="grad__robot">
+          <image href={`/assets/tempio/${r.file}.webp`} x={rx} y={ry} width={r.w} height={r.h} transform={specchia ? `translate(${r1(2 * rcx)} 0) scale(-1 1)` : undefined} />
+        </g>
+      )}
+      <g class:list={['grad__g', { 'is-fatto': i < k, 'is-qui': i === k }]}>
+        <rect class="grad__alzata" x={r1(CX - mezza(i))} y={r1(su(i))} width={r1(2 * mezza(i))} height={r1(h)} />
+        <rect class="grad__chiaro" x={r1(CX - mezza(i))} y={r1(su(i))} width={r1(2 * mezza(i))} height={r1(h)} fill={`url(#${idLuce})`} />
+        <path class="grad__giunto" d={giunti(i).map((x) => `M${r1(x)} ${r1(su(i) + 5)}V${r1(su(i) + h - 1)}`).join('')} fill="none" />
+        <path class="grad__bordo" d={`M${r1(CX - mezza(i))} ${r1(su(i) + 2)}H${r1(CX + mezza(i))}`} fill="none" />
+        {numeroDi(i) && <text class:list={['grad__num', { 'grad__num--mappa': !!numeri }]} x={CX} y={r1(su(i) + h / 2 + fs * 0.36)} font-size={fs}>{numeroDi(i)}</text>}
+      </g>
+      {i === k && r && (
+        <g class="grad__sotto">
+          <ellipse cx={r1(rcx)} cy={r1(su(k) + 3)} rx={r1(r.w * r.ombra + 8)} ry="4.2" />
+          <ellipse cx={r1(rcx)} cy={r1(su(k) + 3)} rx={r1(r.w * r.ombra)} ry="2.6" />
+        </g>
+      )}
+    </Fragment>
+  ))}
+  <rect class="grad__ombra" x="8" y="474" width="624" height="5" />
+</svg>

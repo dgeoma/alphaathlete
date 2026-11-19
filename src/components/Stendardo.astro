@@ -1,0 +1,174 @@
+---
+// Lo stendardo: una sezione-insegna. Un grande telo blu notte e oro appeso a un'asta di legno,
+// come quello che pende dal ponteggio del tempio nelle scene. Chiesto da George il 19/11/2026.
+//   frase: il motto, in maiuscolo sul telo (resta in inglese: è un motto)
+//   sotto: la riga piccola in italiano
+// Il telo si srotola UNA volta quando entra nello schermo (classe .reveal gestita da main.js) e resta aperto.
+// Con «Riduci movimento» o senza JavaScript è già aperto.
+import Lambda from './Lambda.astro';
+interface Props { frase?: string; sotto?: string; id?: string; linguaFrase?: string }
+const {
+  frase = 'Heroes are built here',
+  sotto = 'Qui gli eroi si costruiscono.',
+  id = 'stendardo',
+  linguaFrase = 'en',
+} = Astro.props;
+---
+<section class="stendardo" id={id} aria-labelledby={`${id}-frase`}>
+  <div class="stendardo__asta" aria-hidden="true"></div>
+  <div class="stendardo__telo reveal">
+    <span class="stendardo__filo" aria-hidden="true"></span>
+    <svg class="stendardo__punta" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <path d="M2.2 0 L50 93 L97.8 0" fill="none" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke" />
+    </svg>
+    <Lambda class="stendardo__lambda" />
+    <h2 class="stendardo__frase" id={`${id}-frase`} lang={linguaFrase}>{frase}</h2>
+    <span class="stendardo__riga" aria-hidden="true"></span>
+    <p class="stendardo__sotto">{sotto}</p>
+  </div>
+</section>
+
+<style>
+  .stendardo {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 84px 20px 96px;
+    background:
+      radial-gradient(900px 380px at 50% 12%, rgba(201, 161, 74, 0.13), transparent 70%),
+      var(--bg);
+    overflow: hidden;
+  }
+
+  /* l'asta: legno chiaro con due pomelli d'oro */
+  .stendardo__asta {
+    position: relative;
+    z-index: 2;
+    width: min(1000px, 100%);
+    height: 16px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #c79a63 0%, #9a6a35 45%, #6f4520 100%);
+    box-shadow: 0 6px 14px -6px rgba(15, 30, 58, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+  .stendardo__asta::before,
+  .stendardo__asta::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    background: radial-gradient(circle at 35% 30%, #f6e7c1 0%, #d6b05b 45%, #9a7426 100%);
+    box-shadow: 0 4px 10px -4px rgba(15, 30, 58, 0.5);
+  }
+  .stendardo__asta::before { left: -12px; }
+  .stendardo__asta::after { right: -12px; }
+
+  /* il telo: blu notte, pieghe appena accennate, punta in basso */
+  .stendardo__telo {
+    position: relative;
+    z-index: 1;
+    width: min(900px, 92%);
+    margin-top: -6px;
+    padding: 70px 34px 150px;
+    text-align: center;
+    color: var(--gold-400);
+    background:
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.045) 0, rgba(255, 255, 255, 0) 9%, rgba(0, 0, 0, 0.1) 17%, rgba(255, 255, 255, 0) 25%),
+      radial-gradient(120% 90% at 50% 0%, var(--navy-600) 0%, var(--navy-800) 46%, var(--navy-950) 100%);
+    clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
+    filter: drop-shadow(0 26px 30px rgba(15, 30, 58, 0.28));
+  }
+  /* filetto d'oro interno: tre lati dritti… */
+  .stendardo__filo {
+    position: absolute;
+    inset: 16px 16px 20% 16px;
+    border: 1px solid rgba(226, 194, 122, 0.75);
+    border-bottom: 0;
+    pointer-events: none;
+  }
+  /* …e la punta, che segue il taglio del telo */
+  .stendardo__punta {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 0;
+    width: calc(100% - 32px);
+    height: 20%;
+    color: rgba(226, 194, 122, 0.75);
+    pointer-events: none;
+  }
+  /* la Λ è un componente figlio: serve :global perché lo stile arrivi al suo <svg> */
+  .stendardo__telo :global(.stendardo__lambda) {
+    display: block;
+    width: 46px;
+    height: auto;
+    margin: 0 auto 26px;
+    color: var(--gold-400);
+  }
+  .stendardo__frase {
+    margin: 0 auto;
+    max-width: 14ch;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(34px, 7.4vw, 84px);
+    line-height: 1.08;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    background: var(--grad-gold);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .stendardo__riga {
+    display: block;
+    width: 84px;
+    height: 1px;
+    margin: 30px auto 18px;
+    background: rgba(226, 194, 122, 0.8);
+  }
+  .stendardo__sotto {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold-200);
+  }
+
+  /* srotolamento: una volta sola. Sovrascrive la comparsa generica di .reveal */
+  :global(.js) .stendardo__telo.reveal {
+    opacity: 1;
+    transform: none;
+    clip-path: polygon(0 0, 100% 0, 100% 2%, 50% 6%, 0 2%);
+    transition: clip-path 1.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  :global(.js) .stendardo__telo.reveal.is-in {
+    clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
+  }
+
+  @media (max-width: 700px) {
+    .stendardo { padding: 60px 14px 70px; }
+    .stendardo__asta { height: 12px; }
+    .stendardo__asta::before, .stendardo__asta::after { width: 22px; height: 22px; }
+    .stendardo__asta::before { left: -6px; }
+    .stendardo__asta::after { right: -6px; }
+    .stendardo__telo { width: 90%; padding: 48px 22px 112px; }
+    .stendardo__filo { inset: 10px 10px 20% 10px; }
+    .stendardo__punta { left: 10px; right: 10px; width: calc(100% - 20px); }
+    .stendardo__telo :global(.stendardo__lambda) { width: 36px; margin-bottom: 20px; }
+    .stendardo__frase { max-width: 9ch; letter-spacing: 0.08em; }
+    .stendardo__sotto { font-size: 12.5px; letter-spacing: 0.12em; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .stendardo__telo.reveal {
+      clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%) !important;
+      transition: none !important;
+    }
+  }
+</style>

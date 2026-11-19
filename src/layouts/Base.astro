@@ -1,0 +1,73 @@
+---
+// Scheletro comune di tutte le pagine: <head> completo, skip link, <main>, script.
+// Niente di personale qui dentro: né verifiche di dominio, né JSON-LD, né widget, né analytics.
+import { SITO, NOME_SITO, SITO_NON_PUBBLICO, VERSIONE } from '../config';
+
+interface Props {
+  /** <title> della pagina */
+  titolo: string;
+  /** meta description */
+  descrizione: string;
+  /** percorso canonico, es. "/" o "/grazie/". Se manca usa quello della pagina. */
+  percorso?: string;
+  /** titolo e descrizione per le anteprime dei link; se mancano valgono titolo e descrizione */
+  ogTitolo?: string;
+  ogDescrizione?: string;
+  /** immagine per le anteprime (percorso da public/, 1200×630) e suo testo alternativo. Oggi non c'è. */
+  ogImmagine?: string;
+  ogImmagineAlt?: string;
+  /** true = questa pagina non va nei motori di ricerca anche a sito pubblico (grazie, 404, kit) */
+  noindex?: boolean;
+  /** fogli di stile in più da public/, senza estensione: 'tappe', 'candidatura' */
+  css?: string[];
+  /** script in più da public/, senza estensione: 'tempio', 'tappe', 'candidatura' */
+  js?: string[];
+  /** classe sul <body> */
+  classe?: string;
+}
+const { titolo, descrizione, percorso = Astro.url.pathname, ogTitolo = titolo, ogDescrizione = descrizione, ogImmagine, ogImmagineAlt = '', noindex = false, css = [], js = [], classe } = Astro.props;
+const canonica = new URL(percorso, SITO).href;
+const v = `?v=${VERSIONE}`;
+---
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{titolo}</title>
+<meta name="description" content={descrizione}>
+{(SITO_NON_PUBBLICO || noindex) && <meta name="robots" content="noindex, nofollow">}
+<meta property="og:title" content={ogTitolo}>
+<meta property="og:description" content={ogDescrizione}>
+<meta property="og:type" content="website">
+<meta property="og:locale" content="it_IT">
+<meta property="og:site_name" content={NOME_SITO}>
+<meta property="og:url" content={canonica}>
+{ogImmagine && <meta property="og:image" content={new URL(ogImmagine, SITO).href}>}
+{ogImmagine && <meta property="og:image:width" content="1200">}
+{ogImmagine && <meta property="og:image:height" content="630">}
+{ogImmagine && <meta property="og:image:alt" content={ogImmagineAlt}>}
+<meta name="twitter:card" content={ogImmagine ? 'summary_large_image' : 'summary'}>
+<link rel="canonical" href={canonica}>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0f1e3a">
+<link rel="preload" href="/assets/fonts/montserrat-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/marcellus-latin.woff2" as="font" type="font/woff2" crossorigin>
+<script is:inline>document.documentElement.classList.add('js');setTimeout(function(){if(!window.aaPronto)document.documentElement.classList.remove('js')},3000)</script>
+<link rel="stylesheet" href={`/base.css${v}`}>
+<link rel="stylesheet" href={`/tempio.css${v}`}>
+{css.map((f) => <link rel="stylesheet" href={`/${f}.css${v}`}>)}
+<slot name="head" />
+</head>
+<body class={classe}>
+<a class="skip" href="#contenuto">Vai al contenuto</a>
+<slot name="nav" />
+<main id="contenuto">
+<slot />
+</main>
+<slot name="footer" />
+<script is:inline src={`/main.js${v}`} defer onerror="document.documentElement.classList.remove('js')"></script>
+{js.map((f) => <script is:inline src={`/${f}.js${v}`} defer onerror="document.documentElement.classList.remove('js')"></script>)}
+</body>
+</html>

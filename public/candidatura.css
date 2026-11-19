@@ -1,0 +1,108 @@
+/* alphaathlete.com · candidatura.css
+   Aspetto del questionario a passi (provenienza: vedi README), senza esito e senza calendario.
+   Sta dentro un .riquadro__box (tempio.css). */
+
+.cand { max-width: 640px; margin: 26px auto 0; }
+/* riga piccola sopra l'avanzamento: il gruppo a cui appartiene il passo */
+.cand__gruppo { margin-bottom: 10px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.14em; line-height: 1.4; text-transform: uppercase; color: var(--gold-text); }
+.cand__top { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+/* riga di passaggio sopra il titolo */
+.cand__sopra { margin-bottom: 16px; padding: 12px 16px; border-left: 3px solid var(--gold-500); border-radius: 0 12px 12px 0; background: #f6f3ea; font-size: 15px; line-height: 1.5; color: var(--ink-soft); }
+.cand__bar { flex: 1; height: 6px; border-radius: 99px; background: #ece6d6; overflow: hidden; }
+.cand__bar i { display: block; height: 100%; border-radius: inherit; background: var(--grad-gold); transition: width 0.35s ease; }
+.cand__n { font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.cand h3 { font-size: clamp(21px, 2.3vw, 26px); font-weight: 700; line-height: 1.25; color: var(--ink); }
+/* le domande a cui si risponde scrivendo sono lunghe: un corpo più piccolo, per non alzare la voce */
+.cand__step--testo h3 { font-size: clamp(20px, 2vw, 22px); line-height: 1.3; }
+.cand h3:focus { outline: none; }
+.cand__hint { margin-top: 8px; font-size: 14.5px; color: var(--muted); }
+
+/* scelte */
+.cand__opts { display: grid; gap: 10px; margin-top: 16px; }
+.cand__opt { display: grid; gap: 2px; width: 100%; min-height: 52px; padding: 14px 18px 14px 48px; position: relative; text-align: left; border-radius: 14px; border: 1.5px solid #e2dccb; background: #fff; color: var(--ink); font: inherit; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease; }
+.cand__opt b { font-size: 16px; font-weight: 700; line-height: 1.35; }
+.cand__opt small { font-size: 13.5px; color: var(--muted); }
+.cand__opt::before { content: ""; position: absolute; left: 16px; top: 50%; width: 20px; height: 20px; margin-top: -10px; border-radius: 50%; border: 2px solid #8a7a4e; background: #fff; transition: background 0.2s ease, border-color 0.2s ease; }
+.cand__opts--multi .cand__opt::before { border-radius: 6px; }
+@media (hover: hover) { .cand__opt:hover { border-color: var(--gold-500); transform: translateY(-1px); } }
+.cand__opt[aria-checked="true"], .cand__opt[aria-pressed="true"] { border-color: var(--navy-800); background: #f6f3ea; }
+.cand__opt[aria-checked="true"]::before, .cand__opt[aria-pressed="true"]::before { border-color: var(--navy-800); background: var(--navy-800) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2c27a' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center / 14px no-repeat; }
+
+/* testi */
+/* gli esempi dentro i campi: Safari li farebbe grigio chiaro (2,35:1); così sono 5,95:1 su bianco */
+.cand ::placeholder { color: var(--muted); opacity: 1; }
+/* bordo dei campi: #9a8c63 su bianco supera 3:1 (WCAG 1.4.11) */
+.cand__input, .cand__text { display: block; width: 100%; margin-top: 16px; padding: 14px 16px; border-radius: 14px; border: 1.5px solid #9a8c63; background: #fff; font: inherit; font-size: 16px; line-height: 1.45; color: var(--ink); }
+.cand__text { resize: vertical; min-height: 120px; }
+.cand__input:focus, .cand__text:focus, .cand__campo input:focus { outline: none; border-color: var(--navy-800); box-shadow: 0 0 0 3px rgba(201, 161, 74, 0.35); }
+.cand__conta { margin-top: 6px; text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.cand__conta.is-pieno { color: #8a1c12; font-weight: 700; }
+/* campo in più, facoltativo, sotto la risposta del passo */
+.cand__extra { margin-top: 20px; }
+.cand__campi + .cand__extra { margin-top: 12px; }
+.cand__conta + .cand__ok { margin-top: 8px; }
+
+/* passo con la spunta: elenco numerato e link che si apre in un'altra scheda */
+.cand__elenco { display: grid; gap: 8px; margin-top: 18px; padding: 16px 18px; border-radius: 14px; border: 1px solid var(--line); background: #fbf8f1; }
+.cand__elenco li { display: grid; grid-template-columns: 2.1em minmax(0, 1fr); gap: 10px; font-size: 15.5px; font-weight: 600; line-height: 1.4; color: var(--ink); }
+.cand__elenco-n { font-family: var(--serif); font-weight: 400; text-align: right; color: var(--gold-text); }
+.cand__link { margin-top: 6px; font-size: 14.5px; }
+.cand__link a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-weight: 700; color: var(--ink); text-underline-offset: 3px; }
+.cand__link a::after { content: ""; flex: none; width: 14px; height: 14px; background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f1e3a' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 5H5v14h14v-4M13 5h6v6M19 5l-9 9'/%3E%3C/svg%3E"); }
+.cand__link + .cand__ok { margin-top: 4px; }
+
+/* contatti e spunte */
+.cand__campi { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.cand__campo { display: grid; gap: 6px; font-size: 14px; font-weight: 700; color: var(--ink); }
+.cand__campo em { font-style: normal; font-weight: 500; color: var(--muted); }
+.cand__campo input { width: 100%; min-height: 48px; padding: 13px 14px; border-radius: 12px; border: 1.5px solid #9a8c63; background: #fff; font: inherit; font-size: 16px; font-weight: 500; color: var(--ink); }
+.cand__ok { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; margin-top: 14px; padding: 10px 0; font-size: 14.5px; line-height: 1.45; color: var(--ink-soft); cursor: pointer; }
+.cand__ok input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--navy-800); }
+.cand__ok a { color: var(--ink); font-weight: 700; text-underline-offset: 3px; }
+.cand__ok em { font-style: normal; color: var(--muted); }
+.cand__campi + .cand__ok { margin-top: 8px; }
+.cand__ok + .cand__ok { margin-top: 0; }
+/* campo da correggere: rosso pieno; quando ha il focus torna l'anello blu notte, ben visibile */
+.cand [aria-invalid="true"] { border-color: #c0392b; outline: 2px solid #c0392b; outline-offset: 1px; }
+.cand [aria-invalid="true"]:focus, .cand [aria-invalid="true"]:focus-visible { outline: 3px solid var(--navy-800); outline-offset: 3px; }
+/* senza JavaScript non c'è nessun bottone «Invia»: le righe che ne parlano non si mostrano */
+html:not(.js) #candidatura .riquadro__intro { display: none; }
+/* testo di ripiego: si vede senza JavaScript, o se il motore del questionario non parte */
+.js .cand__ripiego { display: none; }
+.js .cand--guasto .cand__ripiego { display: block; }
+
+/* bottoni, errori, piede */
+.cand__next, .cand__send { margin-top: 18px; }
+/* il messaggio sta sotto titolo e aiuto, prima dei campi (lo scrive candidatura.js) */
+.cand__err { margin: 12px 0 0; padding: 10px 14px; border-radius: 12px; background: #fdecea; color: #8a1c12; font-size: 14.5px; line-height: 1.45; }
+.cand__err p { margin: 0; }
+.cand__err p:not(:only-child) { font-weight: 700; }
+.cand__err ul { margin-top: 4px; display: grid; gap: 3px; }
+.cand__err li { position: relative; padding-left: 14px; }
+.cand__err li::before { content: ""; position: absolute; left: 2px; top: 0.62em; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.cand__err a { color: inherit; font-weight: 700; }
+.cand__foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; min-height: 44px; }
+.cand__back { min-height: 44px; padding: 6px 2px; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 700; color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+/* avviso della modalità prova: lo scrive candidatura.js finché il webhook è vuoto, su qualunque indirizzo */
+.cand__prova { max-width: 640px; margin: 14px auto 0; padding: 8px 12px; border-radius: 10px; border: 1px dashed var(--gold-600); font-size: 13px; color: var(--gold-text); }
+
+.cand__step { animation: cand-in 0.3s ease both; }
+@keyframes cand-in { from { opacity: 0; transform: translateY(8px); } }
+
+@media (max-width: 700px) {
+  .cand { margin-top: 18px; padding: 0 4px; }
+  /* con la tastiera aperta restano circa 330 px: domanda e campo devono starci insieme */
+  .cand h3, .cand__step--testo h3 { font-size: 19px; line-height: 1.3; }
+  .cand__sopra { margin-bottom: 12px; padding: 10px 14px; font-size: 14.5px; }
+  .cand__opt { padding: 13px 14px 13px 44px; }
+  .cand__opt::before { left: 14px; }
+  .cand__next, .cand__send { width: 100%; }
+  .cand__campi { grid-template-columns: 1fr; }
+  .cand__elenco { padding: 14px 14px 14px 8px; }
+  .cand__elenco li { grid-template-columns: 1.9em minmax(0, 1fr); gap: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cand__step { animation: none; }
+  .cand__bar i, .cand__opt, .cand__opt::before { transition: none; }
+  .cand__opt { transform: none; }
+}

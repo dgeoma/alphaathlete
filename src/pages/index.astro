@@ -1,0 +1,503 @@
+---
+// HOME di alphaathlete.com. Ordine delle sezioni, id e testi: copy v2 (§2 mappa, §3 copy, §4 tappe, §5 questionario).
+// I testi sono incollati così come sono: per cambiarli si cambia il copy, poi qui.
+//   · regole della casa → src/data/regole.ts (le leggono anche /regole/ e il passo 11 del questionario)
+//   · footer            → src/components/FooterSito.astro
+//   · meta              → src/config.ts (META)
+//   · stili della home  → public/home.css
+// La parola «gene» sta solo in #per-chi. Un solo bottone a pillola, «Candidati», quattro volte più il menu.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import FooterSito from '../components/FooterSito.astro';
+import Apertura from '../components/Apertura.astro';
+import Riquadro from '../components/Riquadro.astro';
+import Portatori from '../components/Portatori.astro';
+import Frontone from '../components/Frontone.astro';
+import Stendardo from '../components/Stendardo.astro';
+import Tappe from '../components/Tappe.astro';
+import Gradinata from '../components/Gradinata.astro';
+import Questionario from '../components/Questionario.astro';
+import ScenaFinale from '../components/ScenaFinale.astro';
+import Lambda from '../components/Lambda.astro';
+import Lettere from '../components/Lettere.astro';
+import { META, LETTERE_ATTIVE } from '../config';
+import { regole, romano, titoliRegole, testataRegole } from '../data/regole';
+
+const ancore = [
+  { href: '#per-chi', label: 'Per chi è' },
+  { href: '#fuori-dentro', label: 'Cosa si allena' },
+  { href: '#viaggio', label: 'Il corso' },
+  { href: '#come-si-entra', label: 'Come si entra' },
+  { href: '#domande', label: 'Domande' },
+];
+
+// ---------- §4 · le sei tappe (il numero romano lo mette il palco) ----------
+const tappe = [
+  { titolo: 'La fonte: da dove parti', robot: 'indica' as const, sosta: 9000,
+    testo: ['Fuori: scrivi da dove parti e cosa non vuoi sacrificare.', 'Dentro: dai un nome alle scuse che usi di più.'],
+    descrizione: 'La gradinata del tempio: sei gradini di marmo salgono verso la porta. Il primo è d’oro, e sopra c’è un robot che indica la porta.' },
+  { titolo: 'L’incisione: le tue regole', robot: 'progetto' as const, sosta: 9000,
+    testo: ['Fuori: scegli da dove cominci, fra consulenza, formazione e sistemi.', 'Dentro: scrivi le regole che ti dai, e a cosa vuoi legare il tuo lavoro.'],
+    descrizione: 'La gradinata del tempio. Il secondo gradino è d’oro: sopra c’è un robot con la corona d’alloro che legge un disegno.' },
+  { titolo: 'Il ginnasio: il primo sistema', robot: 'portatori' as const, sosta: 9000,
+    testo: ['Fuori: costruisci un sistema che funziona, dall’inizio alla fine.', 'Dentro: guardi cosa c’era attorno quando il gesto veniva da solo.'],
+    descrizione: 'La gradinata del tempio. Il terzo gradino è d’oro: sopra, due robot portano insieme un blocco di marmo.' },
+  { titolo: 'Il tesoro: il servizio e il prezzo', robot: 'indica' as const, sosta: 9000,
+    testo: ['Fuori: quel sistema diventa un servizio, con un nome e un prezzo.', 'Dentro: guardi cosa ti ferma quando devi dire un prezzo.'],
+    descrizione: 'La gradinata del tempio. Il quarto gradino è d’oro, e sopra c’è un robot che indica la porta.' },
+  { titolo: 'Lo stadio: la prova', robot: 'portatori' as const, sosta: 9000,
+    testo: ['Fuori: proponi il servizio a persone vere. Quante, lo dichiari tu.', 'Dentro: decidi come arrivi alla prova, e cosa fai se va male.'],
+    descrizione: 'La gradinata del tempio. Il quinto gradino è d’oro: sopra, due robot portano insieme un blocco di marmo.' },
+  { titolo: 'La dedica: cosa riporti', robot: 'progetto' as const, sosta: 9000,
+    testo: ['Fuori: metti in ordine come lavori, e controlli cosa hai sacrificato.', 'Dentro: scrivi cosa fai oggi che all’inizio non facevi.', 'Insieme: accompagni un’altra persona per una sua tappa.'],
+    descrizione: 'La gradinata del tempio. L’ultimo gradino è d’oro e la porta è illuminata. Sopra c’è un robot con la corona d’alloro.' },
+];
+
+// ---------- §5 · il questionario: dodici schermate ----------
+// Schema: README («Il questionario: schema dei dati») e testa di public/candidatura.js.
+// `errori.contatto` manca di proposito: va messo quando esiste un indirizzo che George legge (README, «Prima di pubblicare»).
+const DA_DOVE = 'Da dove parti';
+const SEI = 'Le sei domande';
+const candidatura = {
+  versione: '2026-11-v2',
+  intro: 'Niente parte finché non premi «Invia la candidatura». Se ricarichi la pagina, le risposte restano dove sono. Se chiudi la scheda, si riparte dal primo passo. I testi lunghi puoi prepararli nelle note e incollarli.',
+  etichette: { facoltativo: 'facoltativo', passo: 'Passo {n} di {tot}' },
+  invio: {
+    etichetta: 'Invia la candidatura', in_corso: 'Sto inviando la tua candidatura…', riprova: 'Riprova',
+    avanti: 'Avanti', indietro: 'Indietro', destinazione: '/grazie/', fonte: 'alphaathlete.com · candidatura',
+  },
+  errori: {
+    scelta: 'Scegli una risposta per andare avanti.',
+    obbligatorio: 'Qui mi serve la tua risposta per andare avanti.',
+    min: 'Raccontami un po’ di più: un posto, un momento, un dettaglio. Servono almeno {min} caratteri.',
+    max: 'Hai superato lo spazio: resta entro {max} caratteri. Il resto me lo racconti a voce.',
+    manca: 'Manca {cosa}.',
+    nome: 'il nome',
+    cognome: 'il cognome',
+    email: 'un’email valida: è lì che ti rispondo',
+    telefono: 'un telefono completo di prefisso, per esempio +39 333 1234567. Oppure lascia il campo vuoto',
+    maggiorenne: 'la spunta sui 18 anni: Alpha Athlete è per chi li ha compiuti',
+    privacy: 'la spunta sulla privacy: senza, non posso leggere la tua candidatura',
+    link: 'Il link sembra incompleto. Correggilo, oppure lascia il campo vuoto.',
+    invio: 'L’invio non è riuscito. Le tue risposte sono ancora qui: aspetta un momento e premi «Riprova».',
+  },
+  passi: [
+    { chiave: 'dove_gareggi', tipo: 'singola' as const, gruppo: DA_DOVE,
+      titolo: 'Dove gareggi, o dove ti alleni, oggi?',
+      opzioni: [
+        { valore: 'sport_fisico', etichetta: 'In uno sport fisico' },
+        // «e-sport» non va a capo dopo il trattino: fra «e-» e «sport» c'è un carattere invisibile che li tiene uniti
+        // (U+2060). Nessuna parola cambia; nel riepilogo che parte il motore lo toglie.
+        { valore: 'competizione_online', etichetta: 'In un e-\u2060sport o in una competizione online' },
+        { valore: 'ex_atleta', etichetta: 'Ho gareggiato per anni. Oggi la mia gara è un’altra' },
+        { valore: 'lavoro', etichetta: 'Nel mio lavoro: è lì che competo' },
+        { valore: 'mi_alleno_senza_gare', etichetta: 'Non ho mai fatto gare, ma mi alleno come se le facessi' },
+        { valore: 'piu_di_uno', etichetta: 'In più di uno di questi posti' },
+      ] },
+    { chiave: 'cosa_fai_per_vivere', tipo: 'testo' as const, gruppo: DA_DOVE, max: 240,
+      titolo: 'Che cosa fai oggi per vivere?',
+      segnaposto: 'Lavoro nell’ufficio di un’azienda di trasporti',
+      extra: { chiave: 'link_facoltativo', etichetta: 'Un link dove si vede quello che fai', max: 200 } },
+    { chiave: 'rapporto_it_ai', tipo: 'singola' as const, gruppo: DA_DOVE,
+      titolo: 'Che rapporto hai oggi con IT e AI?',
+      aiuto: 'Qualunque risposta va bene. Qui si entra anche partendo da zero.',
+      opzioni: [
+        { valore: 'da_zero', etichetta: 'Parto da zero, o quasi' },
+        { valore: 'uso_personale', etichetta: 'Li uso tutti i giorni, per me' },
+        { valore: 'ho_costruito', etichetta: 'Ci ho già costruito qualcosa, per me o per chi conosco' },
+        { valore: 'e_il_mio_lavoro', etichetta: 'È già il mio lavoro: mi pagano per questo' },
+      ] },
+    { chiave: 'tempo_settimanale', tipo: 'singola' as const, gruppo: DA_DOVE,
+      titolo: 'Quanto tempo puoi dedicare ad Alpha Athlete in una settimana normale?',
+      aiuto: 'Scegli la fascia giusta, anche se è bassa. Il tempo è una delle cose che guardo: se vedo che per le missioni non basta, te lo dico.',
+      opzioni: [
+        { valore: 'meno_di_2', etichetta: 'Meno di 2 ore' },
+        { valore: 'da_2_a_4', etichetta: 'Da 2 a 4 ore' },
+        { valore: 'da_4_a_6', etichetta: 'Da 4 a 6 ore' },
+        { valore: 'piu_di_6', etichetta: 'Più di 6 ore' },
+      ] },
+    { chiave: 'gesto_da_solo', tipo: 'testo_lungo' as const, gruppo: SEI, min: 60, max: 1500,
+      sopra: 'Da qui in avanti le domande chiedono di pensarci. Rispondi tu, come parleresti: bastano poche righe, e un testo fatto scrivere a un’AI non mi dice niente di te. Le cose più private tienile per il colloquio, se vorrai.',
+      titolo: 'Raccontami una volta in cui il gesto ti è venuto da solo, senza doverci pensare. In una gara, in una disciplina, in un gioco, in un lavoro. Dov’eri, e cosa c’era attorno?',
+      aiuto: 'Non serve aver vinto, né che fosse una gara.' },
+    { chiave: 'sconfitta_e_giorno_dopo', tipo: 'testo_lungo' as const, gruppo: SEI, min: 60, max: 1500,
+      titolo: 'Pensa a una volta in cui hai dato tutto e hai perso: una gara, una sfida, un progetto. Che cosa hai fatto il giorno dopo?',
+      aiuto: 'Di infortuni e di salute non serve scrivere: se c’entrano, me ne parli a voce.' },
+    { chiave: 'scusa_alla_porta', tipo: 'testo' as const, gruppo: SEI, max: 240,
+      titolo: 'Qual è la scusa che ti racconti più spesso? Scrivila come la diresti.',
+      aiuto: 'Tutti ne abbiamo una. Basta una riga.' },
+    { chiave: 'impegno_tre_mesi', tipo: 'testo' as const, gruppo: SEI, max: 240,
+      titolo: 'Fra tre mesi, che cosa vuoi aver fatto che oggi non hai fatto? Una cosa sola, che si possa vedere.' },
+    { chiave: 'non_sacrifico', tipo: 'testo' as const, gruppo: SEI, max: 240,
+      titolo: 'Che cosa non vuoi sacrificare per il lavoro?',
+      segnaposto: 'Le cene a casa e l’allenamento del martedì',
+      aiuto: 'Bastano poche parole. Non servono nomi né dettagli privati.' },
+    { chiave: 'cosa_porti', tipo: 'testo_lungo' as const, gruppo: SEI, min: 60, max: 1500,
+      titolo: 'Che cosa porti agli altri? Una competenza, un’esperienza, un modo di stare in un gruppo.',
+      aiuto: 'Non serve che c’entri con IT o AI.' },
+    { chiave: 'patto_accettato', tipo: 'spunta' as const, gruppo: 'Le regole della casa',
+      titolo: 'Le regole della casa.',
+      elenco: titoliRegole,
+      link: { href: '/regole/', testo: 'Leggi le regole per intero' },
+      opzioni: ['Ho letto le regole della casa e, se entro, mi impegno a rispettarle.'],
+      extra: { chiave: 'patto_note', etichetta: 'C’è una regola che ti pesa? Dimmi quale.', max: 300 },
+      errore: 'Per candidarti serve accettare le regole della casa.' },
+    { chiave: 'contatti', tipo: 'contatti' as const, gruppo: 'I tuoi contatti',
+      titolo: 'Ultima schermata: come ti chiami e dove ti scrivo.',
+      etichette: { nome: 'Nome', cognome: 'Cognome', email: 'Email', telefono: 'Telefono' },
+      extra: { chiave: 'domanda_per_george', etichetta: 'C’è una cosa che vuoi chiedermi prima?', max: 300 },
+      maggiorenne: { testo: 'Ho compiuto 18 anni.' },
+      privacy: { testo: 'Ho letto l’informativa sulla privacy e acconsento al trattamento dei miei dati per valutare questa candidatura.', link: '/privacy/', link_testo: 'Leggi l’informativa' },
+      // esce solo con LETTERE_ATTIVE = true (src/config.ts): fino ad allora <Questionario> la toglie da sola
+      lettere: { testo: 'Voglio ricevere anche le lettere di Alpha Athlete. Posso smettere quando voglio.' } },
+  ],
+};
+---
+<Base
+  titolo={META.titolo}
+  descrizione={META.descrizione}
+  ogTitolo={META.ogTitolo}
+  ogDescrizione={META.ogDescrizione}
+  ogImmagine={META.ogImmagine}
+  ogImmagineAlt={META.ogImmagineAlt}
+  percorso="/"
+  css={['tappe', 'candidatura', 'home']}
+  js={['tempio', 'tappe', 'candidatura']}
+>
+  <Nav slot="nav" ancore={ancore} logoHref="#top" cielo />
+
+  <!-- 1 · APERTURA · #top -->
+  <Apertura sfera pausa="Ferma i robot" riparti="Fai ripartire i robot">
+    <Fragment slot="etichetta">Per atlete e atleti del digitale</Fragment>
+    <Fragment slot="titolo"><span>Qui alleni il mestiere.</span> <span>E alleni te.</span></Fragment>
+    <Fragment slot="sottotitolo">Una community privata dove costruisci un mestiere da freelance in IT e AI: consulenza, formazione, installazione di sistemi.</Fragment>
+    <Fragment slot="testo">E lavori su di te, che quel mestiere lo fai. C’è un corso a tappe. Si entra su candidatura.</Fragment>
+    <Fragment slot="azione">
+      <a class="btn" href="#candidatura">Candidati</a>
+      <p class="cta-note">Parte adesso. Chi entra ora forma il gruppo fondatore. Le candidature le leggo io, George.</p>
+    </Fragment>
+  </Apertura>
+
+  <!-- 2 · «ALPHA», UNA VOLTA SOLA · #nome -->
+  <Riquadro id="nome" sale robot={false} titoloId="nome-t">
+    <div class="riquadro__head nome reveal">
+      <Lambda class="nome__lambda" />
+      <p class="eyebrow">Il nome</p>
+      <h2 id="nome-t">Qui «Alpha» vuol dire una cosa: la gara è prima di tutto con te.</h2>
+      <p class="riquadro__intro">Con i tuoi limiti e con chi eri ieri. Per me Alpha Athlete è uno stato mentale, e si allena.</p>
+      <p class="riquadro__intro">Atlete e atleti del digitale: chi porta la testa da atleta nel lavoro con i computer e con l’AI, senza perdere il lato umano. Chi lo fa già, e chi comincia adesso.</p>
+    </div>
+  </Riquadro>
+
+  <!-- 3 · PER CHI È · #per-chi (la parola «gene» sta solo qui) -->
+  <section class="section" id="per-chi" aria-labelledby="per-chi-t">
+    <div class="wrap perchi">
+      <div class="perchi__testo">
+        <p class="eyebrow reveal">Per chi è</p>
+        <h2 class="reveal" id="per-chi-t">Conosci il momento in cui il gesto viene da solo?</h2>
+        <p class="reveal">Una palla che cade dove volevi senza averci pensato. Una mossa vista tre turni prima. Un lavoro che ti esce dalle mani, e alzi gli occhi che è già buio. In quel momento è come essere guidati. Poi passa, e a comando non torna.</p>
+        <p class="reveal">Quello che in quel momento si accende lo chiamo gene Alpha Athlete. È un’immagine, e funziona così: il gene c’è sempre, conta se è acceso. C’è chi ha gareggiato una vita e non l’ha mai sentito accendersi. C’è chi non ha mai fatto una gara e lo conosce bene. Qui cerco chi ce l’ha già acceso.</p>
+        <p class="reveal">La volontà finisce. Quello che regge, e che tiene acceso il gene, è l’ambiente in cui lavori: cosa fai ogni giorno, e le persone con cui lo fai. Alpha Athlete nasce per essere un ambiente così. Qui ci alleniamo a ritrovare le condizioni in cui il gesto viene da solo. Che torni a comando non te lo prometto.</p>
+        <p class="firma reveal"><a href="#chi">George Dragos Matei</a></p>
+      </div>
+      <div class="card card--ferma perchi__card reveal">
+        <h3 class="etichetta">Può essere il tuo posto</h3>
+        <ul class="checks checks--dot">
+          <li>Atlete e atleti di uno sport fisico, a qualunque livello.</li>
+          <li>Chi compete in un <span class="nowrap">e-sport</span> o nei tornei online.</li>
+          <li>Atleti 2.0: chi ha gareggiato per anni e oggi non vive di sport.</li>
+          <li>Chi non ha mai fatto una gara e si allena come se le facesse.</li>
+        </ul>
+        <p class="serif-frase">A volte la tua disciplina non era il traguardo. Era la prova d’ingresso a una partita più grande: la tua vita.</p>
+        <div class="perchi__fine">
+          <p>Col mestiere puoi partire da zero. Quello che guardo è la testa da atleta.</p>
+          <a class="btn" href="#candidatura">Candidati</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · LA DIREZIONE · #direzione -->
+  <section class="section section--soft" id="direzione" aria-labelledby="direzione-t">
+    <div class="wrap wrap--narrow direzione">
+      <p class="eyebrow reveal">La direzione</p>
+      <h2 class="reveal" id="direzione-t">Verso cosa lavori.</h2>
+      <p class="reveal">Vivere da freelance, in libertà, guadagnando bene, con il lavoro legato a una missione più alta. E arrivarci senza sacrificare partner, famiglia, figli e passioni.</p>
+      <p class="reveal">Ci arrivi con consulenza, formazione, installazione di sistemi IT e AI. Con una, oppure con più di una. Un esempio: un’attività perde le richieste dei clienti. Tu le installi un sistema che le raccoglie e prepara la risposta, poi insegni alle persone a usarlo.</p>
+      <p class="reveal">Perché proprio questo lavoro? Installare sistemi e formare le persone è quello che faccio ogni giorno, ed è quello che so insegnare. E si impara come una disciplina: provi, misuri, rifai.</p>
+      <p class="reveal">È una direzione, non una garanzia: cifre e tempi qui non ne trovi.</p>
+      <p class="serif-frase serif-frase--grande reveal">La tecnologia è il mezzo. Le persone a cui vuoi bene sono il motivo.</p>
+    </div>
+  </section>
+
+  <!-- 5 · FUORI, DENTRO, INSIEME · #fuori-dentro -->
+  <Frontone tono="blu" id="fuori-dentro" titoloId="fuori-dentro-t">
+    <header class="section__head reveal">
+      <p class="eyebrow">Cosa si allena</p>
+      <h2 id="fuori-dentro-t">Fuori, dentro, insieme.</h2>
+      <p>Lavori sul sistema esteriore e su quello interiore. Nello stesso posto, con le stesse persone.</p>
+    </header>
+    <div class="cards cards--3 sistemi">
+      <article class="card card--ferma sistemi__fuori reveal">
+        <p class="card__voce">Fuori</p>
+        <h3>Il mestiere</h3>
+        <p>Quello che fai per vivere. Ha due facce: la tecnica, cioè come lo fai, e il business, cioè come lo vendi.</p>
+      </article>
+      <article class="card card--ferma sistemi__dentro reveal" style="--d:.08s">
+        <p class="card__voce">Dentro</p>
+        <h3>Chi lo fa</h3>
+        <ul class="voci">
+          <li><strong>Identità:</strong> chi sei, e le regole che ti dai.</li>
+          <li><strong>Emozioni:</strong> cosa fai quando non hai voglia, come stai sotto pressione.</li>
+          <li><strong>Quello che non vedi:</strong> ciò che ti muove senza che tu te ne accorga.</li>
+          <li><strong>Relazioni:</strong> chiedere una mano, e stare in un gruppo.</li>
+          <li><strong>Mente:</strong> come ti dai un obiettivo, e come lo tieni.</li>
+        </ul>
+      </article>
+      <article class="card card--ferma sistemi__insieme reveal" style="--d:.16s">
+        <p class="card__voce">Insieme</p>
+        <h3>Chi hai accanto</h3>
+        <p>La competizione è costruttiva: gli altri fanno il tifo per te, e tu per loro. Zero tolleranza per la tossicità: le regole della casa sono scritte più sotto, con gli esempi.</p>
+      </article>
+    </div>
+    <p class="sistemi__sotto reveal">Sulle emozioni e su quello che non vedi lavoriamo come fa un’atleta con la testa: per allenarla. Non è terapia e non la sostituisce.</p>
+  </Frontone>
+
+  <!-- 6 · LO STENDARDO (così com'è: nessun altro testo, nessun bottone) e PERCHÉ EROI · #stendardo + #eroi -->
+  <Stendardo />
+  <section class="eroi" id="eroi" aria-labelledby="eroi-t">
+    <div class="wrap eroi__in reveal">
+      <h3 class="etichetta etichetta--centro" id="eroi-t">Perché eroi</h3>
+      <p>Il campione batte gli altri e sale sul podio. L’eroe gareggia prima di tutto con se stesso, e poi torna a portare qualcosa agli altri.</p>
+      <p>Se su un podio ci sei stata o ci sei stato, quel podio resta tuo. Qui la misura è un’altra: sul podio c’è posto per uno, nel viaggio c’è posto per chiunque parta.</p>
+    </div>
+  </section>
+
+  <!-- 7 · IL CORSO A TAPPE · #viaggio (testata sopra il palco; nota e bottone sotto) -->
+  <Tappe id="viaggio" titoloId="viaggio-t" tappe={tappe} etichetta="Le tappe del corso" ferma="Ferma l’avanzamento e mostra le tappe finite">
+    <Fragment slot="apre">
+      <p class="eyebrow">Il corso</p>
+      <h2 id="viaggio-t">Il viaggio dell’eroe, in sei tappe.</h2>
+      <p class="tappe__riga">Se la tua disciplina era la prova d’ingresso, qui porti quella testa nel lavoro. Ogni tappa ha le sue lezioni, che tengo io, e si chiude con una missione.</p>
+    </Fragment>
+    <Fragment slot="sotto">
+      <p class="tappe__nota">Il primo giorno trovi la prima tappa. Le altre le costruisco io, una alla volta, con il gruppo fondatore.</p>
+      <a class="btn" href="#candidatura">Candidati</a>
+    </Fragment>
+  </Tappe>
+
+  <!-- 8 · UNA SETTIMANA, E DUE MISSIONI · #settimana -->
+  <section class="section" id="settimana" aria-labelledby="settimana-t">
+    <div class="wrap">
+      <header class="section__head reveal">
+        <p class="eyebrow">La settimana</p>
+        <h2 id="settimana-t">Come sarà una settimana.</h2>
+      </header>
+      <div class="cards cards--3">
+        <article class="card card--ferma reveal">
+          <p class="etichetta">Inizio settimana</p>
+          <h3>L’appello</h3>
+          <p>Scrivi una riga: «Questa settimana gareggio su…». Una cosa sola, che dipende da te: sul mestiere, o su di te.</p>
+        </article>
+        <article class="card card--ferma reveal" style="--d:.08s">
+          <p class="etichetta">Metà settimana</p>
+          <h3>La chiamata di gruppo</h3>
+          <p>Due o tre persone portano un caso: un punto in cui sono ferme, o una prova in arrivo. Il gruppo ci lavora, e chi l’ha portato dice cosa fa entro la settimana dopo.</p>
+        </article>
+        <article class="card card--ferma reveal" style="--d:.16s">
+          <p class="etichetta">Fine settimana</p>
+          <h3>Il resoconto</h3>
+          <p>Sotto la tua riga scrivi com’è andata: fatto o non fatto, e una cosa che hai capito. Poi rispondi a un’altra persona.</p>
+        </article>
+      </div>
+      <p class="settimana__sotto reveal">Giorni e orari li fissiamo insieme, con chi entra.</p>
+
+      <Portatori>
+        <div class="banda su-scuro missioni reveal">
+          <div class="missioni__testa">
+            <span class="targhetta">Esempio</span>
+            <h3 class="etichetta">Due missioni</h3>
+          </div>
+          <div class="missioni__grid">
+            <div class="missioni__due">
+              <p class="missione"><strong>Prima tappa.</strong> «La mia presentazione al gruppo, in cinque righe.»</p>
+              <p class="missione"><strong>Terza tappa.</strong> «Entro venerdì il mio sistema raccoglie le richieste di un’attività che conosco e prepara la risposta. Poi lo faccio girare davanti a una persona del gruppo.»</p>
+            </div>
+            <div class="missioni__quando">
+              <h4>Una missione è fatta bene quando</h4>
+              <ul class="checks">
+                <li>È fatta o non fatta.</li>
+                <li>Ha una data.</li>
+                <li>Dipende da te.</li>
+                <li>La vedono gli altri.</li>
+                <li>Sta un passo oltre il tuo livello di oggi.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Portatori>
+    </div>
+  </section>
+
+  <!-- 9 · LE REGOLE DELLA CASA · #regole (testi in src/data/regole.ts) -->
+  <section class="section section--soft" id="regole" aria-labelledby="regole-t">
+    <div class="wrap">
+      <header class="section__head reveal">
+        <p class="eyebrow">{testataRegole.etichetta}</p>
+        <h2 id="regole-t">{testataRegole.titolo}</h2>
+        <p>{testataRegole.rigaHome}</p>
+      </header>
+      <div class="faq faq--regole">
+        {regole.map((r, i) => (
+          <details class="reveal">
+            <summary><span class="faq__n" aria-hidden="true">{romano(i + 1)}</span><span class="sr-only">{i + 1}. </span><span>{r.titolo}</span></summary>
+            <div>
+              {r.testo.map((p) => <p>{p}</p>)}
+              <p><strong>Perché:</strong> {r.perche}</p>
+              <p><strong>{r.se.etichetta}:</strong> {r.se.testo}</p>
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · DA DOVE VIENE · #origine -->
+  <Frontone tono="oro" id="origine" titolo="Da dove viene">
+    <Fragment slot="sopra">
+      <!-- il titolo della sezione è l'<h2> nascosto che scrive <Frontone titolo>: questa riga è la sua forma visibile -->
+      <p class="eyebrow eyebrow--centro" aria-hidden="true">Da dove viene</p>
+      <p>Alpha Athlete nasce a Dubai, l’11 ottobre 2015. Nel 2019 diventa una società a Londra. Era troppo presto, e la società si è fermata. L’idea&nbsp;no.</p>
+    </Fragment>
+    Quando un’idea viene portata avanti per undici anni, non può essere ignorata.
+    <Fragment slot="sotto">Oggi diventa una community.</Fragment>
+  </Frontone>
+
+  <!-- 11 · CHI C'È DIETRO · #chi (l'unica foto di George in tutto il sito) -->
+  <section class="section" id="chi" aria-labelledby="chi-t">
+    <div class="wrap chi">
+      <figure class="chi__foto reveal">
+        <img
+          src="/assets/foto/george-lambda-2017-arco-960.webp"
+          srcset="/assets/foto/george-lambda-2017-arco-480.webp 480w, /assets/foto/george-lambda-2017-arco-960.webp 960w"
+          sizes="(max-width: 700px) 78vw, 360px"
+          width="960" height="1200" loading="lazy"
+          alt="George Dragos Matei in un autoscatto del 2017: con la mano forma una lambda.">
+        <figcaption>2017. Con la mano, la Λ di Alpha Athlete.</figcaption>
+      </figure>
+      <div class="chi__testo">
+        <p class="eyebrow reveal">Chi c’è dietro</p>
+        <h2 class="reveal" id="chi-t">Sono George Dragos Matei.</h2>
+        <p class="reveal">Oggi installo sistemi IT e AI nelle aziende, e formo le persone che li usano.</p>
+        <p class="reveal">Ho fatto pallanuoto a livello agonistico per sette anni. Ho seguito il programma di coaching Robbins-Madanes (2018) e un corso di psicologia dello sport per lo sviluppo degli atleti del Barça Innovation Hub (2020). Sono corsi: non sono uno psicologo.</p>
+        <p class="reveal">Vivo e lavoro dagli Emirati. I colloqui li faccio io.</p>
+        <div class="cta-row reveal"><a class="btn" href="#candidatura">Candidati</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 · DOMANDE · #domande -->
+  <section class="section section--soft" id="domande" aria-labelledby="domande-t">
+    <div class="wrap">
+      <header class="section__head reveal">
+        <p class="eyebrow">Domande</p>
+        <h2 id="domande-t">Le cose che è giusto sapere prima.</h2>
+      </header>
+      <div class="faq">
+        <details class="reveal"><summary>Quanto costa?</summary><div><p>Alpha Athlete è a pagamento. La cifra te la dico a voce, in colloquio, dopo che ci siamo conosciuti. Nella candidatura non ti chiedo quanto puoi spendere. Prima di pagare ricevi le condizioni per iscritto.</p></div></details>
+        <details class="reveal"><summary>Dove si svolge?</summary><div><p>Online, in un gruppo privato. Ci entri dal computer e anche dal telefono. Tutto in italiano.</p></div></details>
+        <details class="reveal"><summary>Quanto tempo serve?</summary><div><p>Ogni settimana ci sono due righe da scrivere, l’appello e il resoconto, e una chiamata di gruppo. In più c’è la missione della tappa in cui ti trovi. Nella candidatura ti chiedo quante ore hai in una settimana normale. Scegli la fascia giusta: il tempo è una delle cose che guardo, e se vedo che per le missioni non basta te lo dico.</p></div></details>
+        <details class="reveal"><summary>È già tutto pronto?</summary><div><p>No. Oggi nel gruppo non c’è ancora nessuno: le prime persone che entrano sono il gruppo fondatore. Il primo giorno trovi le regole della casa, la prima tappa del corso e la settimana che comincia: appello, chiamata di gruppo, resoconto. Il resto si costruisce con chi c’è. Chi entra adesso entra in un cantiere.</p></div></details>
+        <details class="reveal"><summary>E se il mio mestiere è un altro?</summary><div><p>Oggi Alpha Athlete lavora su un mestiere solo. In futuro potranno nascere community su altri mestieri: a proporle saranno i membri.</p></div></details>
+        <details class="reveal"><summary>Ci si incontra anche di persona?</summary><div><p>Una volta l’anno vogliamo farlo. Oggi è un’intenzione. Quando e dove lo decidiamo insieme.</p></div></details>
+      </div>
+      <p class="faq__more reveal">La domanda che manca scrivimela nell’ultima schermata della candidatura: ti rispondo quando ti scrivo.</p>
+    </div>
+  </section>
+
+  <!-- 13 · FA PER TE, NON FA PER TE · #fa-per-te -->
+  <section class="section" id="fa-per-te" aria-labelledby="fa-per-te-t">
+    <div class="wrap">
+      <header class="section__head reveal">
+        <p class="eyebrow">Prima di candidarti</p>
+        <h2 id="fa-per-te-t">Giusti l’uno per l’altra, oppure no.</h2>
+      </header>
+      <div class="fit">
+        <div class="fit__col reveal">
+          <h3>Fa per te se</h3>
+          <ul class="checks">
+            <li>Conosci il momento in cui il gesto viene da solo, ovunque ti sia successo: in una gara, in una disciplina, in un gioco, in un lavoro.</li>
+            <li>Sai raccontare una sconfitta senza cercare un colpevole.</li>
+            <li>Vuoi vivere di questo mestiere, anche partendo da zero, senza farlo pagare alle persone a cui tieni.</li>
+            <li>Hai qualche ora ogni settimana, e la difendi.</li>
+            <li>Ti va di dare una mano agli altri.</li>
+          </ul>
+        </div>
+        <div class="fit__col fit__col--no reveal" style="--d:.08s">
+          <h3>Non fa per te se</h3>
+          <ul class="checks checks--x">
+            <li>Cerchi una promessa di guadagno.</li>
+            <li>Cerchi un podio qui, sopra gli altri membri.</li>
+            <li>Cerchi un pubblico a cui vendere.</li>
+            <li>Vuoi trovare tutto già pronto.</li>
+            <li>Quello che ti serve adesso è un percorso di cura: è una cosa seria, e non è questa.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 · COME SI ENTRA · #come-si-entra (nessun bottone: il questionario è subito sotto) -->
+  <Frontone tono="blu" id="come-si-entra" titoloId="come-si-entra-t">
+    <header class="section__head reveal">
+      <p class="eyebrow">Come si entra</p>
+      <h2 id="come-si-entra-t">Una candidatura scritta, poi un colloquio.</h2>
+      <p>Serve a tutti e due: io capisco se questo è il posto per te, tu capisci se lo vuoi davvero.</p>
+    </header>
+    <div class="entra">
+      <figure class="scena entra__disegno reveal" role="img" aria-label="La gradinata del tempio vista di fronte: tre gradini di marmo salgono verso la porta. Sul primo, d’oro, un robot con la corona d’alloro legge un foglio. I gradini portano i numeri I, II e III, come i tre passi.">
+        <Gradinata n={3} k={1} robot="progetto" numeri={['I', 'II', 'III']} />
+      </figure>
+      <ol class="entra__passi" role="list">
+        <li class="reveal">
+          <span class="entra__n" aria-hidden="true">I</span>
+          <div><h3><span class="sr-only">1. </span>La candidatura</h3>
+          <p>Dodici schermate, qui sotto: quattro rapide, sei che chiedono di pensarci, poi le regole e i tuoi contatti. Le risposte le leggo io, di persona, una per una. Rispondo a tutte: in quanti giorni, non so dirtelo.</p></div>
+        </li>
+        <li class="reveal" style="--d:.08s">
+          <span class="entra__n" aria-hidden="true">II</span>
+          <div><h3><span class="sr-only">2. </span>Il colloquio</h3>
+          <p>Se leggendo vedo che ha senso conoscerci, ti invito a una videochiamata con me. Parto da quello che hai scritto, ti racconto come funziona una settimana e ti dico la cifra: Alpha Athlete è a pagamento.</p></div>
+        </li>
+        <li class="reveal" style="--d:.16s">
+          <span class="entra__n" aria-hidden="true">III</span>
+          <div><h3><span class="sr-only">3. </span>L’esito</h3>
+          <p>Decidiamo in due. Un sì, oppure un «non adesso»: lo posso dire io e lo puoi dire tu. Se lo dico io, ti scrivo il motivo: è una valutazione su cosa posso darti io oggi. E puoi candidarti di nuovo. Dopo un sì ricevi le condizioni scritte, da leggere con calma.</p></div>
+        </li>
+      </ol>
+    </div>
+    <div class="card card--ferma card--larga entra__domande reveal">
+      <h3 class="etichetta">Due delle domande che trovi</h3>
+      <p class="serif-frase">«Raccontami una volta in cui il gesto ti è venuto da solo, senza doverci pensare. Dov’eri, e cosa c’era attorno?»</p>
+      <p class="serif-frase">«Qual è la scusa che ti racconti più spesso? Scrivila come la diresti.»</p>
+      <p class="entra__riga">Ti chiedo di gare e di lavoro. Le cose più private tienile per il colloquio, se vorrai.</p>
+    </div>
+    <p class="entra__ultima reveal">Nessuna fretta. La porta resta dov’è.</p>
+  </Frontone>
+
+  <!-- 15 · LA CANDIDATURA · #candidatura (WEBHOOK_CANDIDATURA vuoto in src/config.ts = modalità prova, niente rete) -->
+  <Questionario dati={candidatura} robot>
+    <Fragment slot="etichetta">La candidatura</Fragment>
+    <Fragment slot="titolo">Prima scrivi tu. Poi ti scrivo io.</Fragment>
+    <Fragment slot="nota">Le risposte arrivano a George Dragos Matei. Titolare dei dati: Alpha Consulting Group FZE (Alpha Group). <a href="/privacy/">Informativa sulla privacy</a>.</Fragment>
+    <Fragment slot="senza-js">Il questionario ha bisogno di JavaScript. Attivalo nel browser e ricarica la pagina.</Fragment>
+  </Questionario>
+
+  <!-- 16 · SCENA FINALE · #finale -->
+  <ScenaFinale id="finale" etichetta="I costruttori">Anche il tempio di Apollo è stato costruito un pezzo alla volta.</ScenaFinale>
+
+  <!-- la riga per lasciare l'email: costruita, SPENTA. Esce solo con LETTERE_ATTIVE = true (src/config.ts) -->
+  {LETTERE_ATTIVE && <Lettere />}
+
+  <FooterSito slot="footer" home />
+</Base>

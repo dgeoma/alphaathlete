@@ -1,0 +1,27 @@
+---
+// Barra in alto. Logo: monogramma Λ + scritta «Alpha Athlete». Un solo bottone a pillola.
+import Lambda from './Lambda.astro';
+interface Ancora { href: string; label: string }
+interface Props {
+  /** voci del menu (spariscono sotto i 980 px). In home: '#sezione'; nelle altre pagine: '/#sezione'. */
+  ancore?: Ancora[];
+  /** dove porta il logo: '#top' in home, '/' altrove */
+  logoHref?: string;
+  /** il bottone a pillola; false per non metterlo */
+  cta?: Ancora | false;
+  /** true sulle pagine che iniziano con <Apertura>: il menu parte trasparente sul cielo e diventa marmo allo scroll */
+  cielo?: boolean;
+}
+const { ancore = [], logoHref = '/', cta = { href: '#candidatura', label: 'Candidati' }, cielo = false } = Astro.props;
+---
+<header class:list={['nav', { 'nav--cielo': cielo }]}>
+  <div class="wrap nav__inner">
+    <a class="wordmark" href={logoHref} aria-label={logoHref.startsWith('#') ? 'Alpha Athlete, torna su' : 'Alpha Athlete, pagina iniziale'}><Lambda class="wordmark__lambda" /><span>Alpha Athlete</span></a>
+    {ancore.length > 0 && (
+      <nav class="nav__links" aria-label="Sezioni">
+        {ancore.map((a) => <a href={a.href}>{a.label}</a>)}
+      </nav>
+    )}
+    {cta && <a class="btn btn--small" href={cta.href}>{cta.label}</a>}
+  </div>
+</header>

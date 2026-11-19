@@ -1,0 +1,81 @@
+---
+// Palco a tappe: palco fisso alto come lo schermo, una rotella = una tappa, numeri romani cliccabili con la
+// linea d'oro che avanza, pulsante «ferma», avanzamento da solo. Senza JS, con movimento ridotto o sotto i
+// 600 px di altezza le tappe restano in colonna, già finite. Serve css={['tappe']} e js={['tappe']} nel layout.
+//
+// Ogni tappa ha una scena a sinistra e il testo a destra. La scena predefinita è la gradinata del tempio
+// (<Gradinata>); per sostituirla in una tappa si passa lo slot `scena-1`, `scena-2`… (contenuto libero, 640×490).
+//
+// Slot: testa (etichetta, <h2>, eventuale <p class="tappe__lead">) · azione (bottone) · scena-N
+//       apre  = testata SOPRA il palco, che scorre via (etichetta, <h2>, <p class="tappe__riga">): da usare al posto di `testa`
+//               quando il testo è lungo. Così il palco fisso porta solo scena, numeri e testo della tappa, e sta
+//               anche in uno schermo basso (telefono, portatile) senza nascondere niente.
+//       sotto = nota e bottone SOTTO il palco (fuori dalla parte fissa): si leggono dopo l'ultima tappa.
+import Gradinata from './Gradinata.astro';
+import type { Robot } from './Gradinata.astro';
+interface Tappa {
+  titolo: string;
+  /** uno o più paragrafi; tenerlo corto (circa 220 caratteri): sul telefono deve stare in uno schermo.
+   *  Se un paragrafo comincia con una parola sola seguita da due punti («Dentro: …», «Missione: …»), quella
+   *  parola esce in grassetto. È solo testo: l'HTML scritto qui dentro viene mostrato così com'è, non eseguito. */
+  testo: string | string[];
+  /** robot sul gradino: 'indica' | 'portatori' | 'progetto' | 'nessuno'. Se manca: indica e portatori si alternano */
+  robot?: Robot;
+  /** millisecondi di sosta prima di passare da soli alla tappa dopo (default 7000) */
+  sosta?: number;
+  /** descrizione della scena per chi non la vede; se manca ne viene scritta una */
+  descrizione?: string;
+}
+interface Props {
+  id?: string;
+  tappe: Tappa[];
+  /** nome del gruppo dei numeri per i lettori di schermo */
+  etichetta?: string;
+  /** greca sottile in cima alla sezione (default: sì) */
+  greca?: boolean;
+  /** nome del pulsante «ferma» per chi non vede */
+  ferma?: string;
+  /** id dell'<h2> scritto nello slot `apre` o `testa`: dà il nome alla sezione (aria-labelledby) */
+  titoloId?: string;
+}
+const { id = 'tappe', tappe, etichetta = 'Le tappe', greca = true, ferma = "Ferma l'avanzamento automatico e mostra le scene finite", titoloId } = Astro.props;
+const n = tappe.length;
+const romano = (x: number) => [['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]].reduce((s, [l, v]) => { while (x >= (v as number)) { s += l; x -= v as number; } return s; }, '');
+// «Dentro: testo» → ['Dentro:', ' testo']. Solo una parola senza spazi, seguita da due punti e poi da uno spazio
+// (o dalla fine): così «https://…» e le frasi con i due punti a metà restano come sono.
+const conVoce = (p: string): [string, string] => { const m = /^([^\s:]+:)(\s[\s\S]*)?$/.exec(p); return m ? [m[1], m[2] ?? ''] : ['', p]; };
+const scene = await Promise.all(tappe.map((_, i) => (Astro.slots.has(`scena-${i + 1}`) ? Astro.slots.render(`scena-${i + 1}`) : null)));
+---
+<section class:list={['tappe', 'su-scuro', { 'tappe--sotto': Astro.slots.has('sotto') }]} id={id} aria-labelledby={titoloId} style={`--n:${n}`}>
+  {greca && <div class="greca" aria-hidden="true"></div>}
+  {Astro.slots.has('apre') && <header class="wrap tappe__apre reveal"><slot name="apre" /></header>}
+  <div class="tappe__pista">
+    {tappe.map((_, i) => <span class="tappe__snap" style={`--k:${i}`} aria-hidden="true"></span>)}
+    <div class="wrap tappe__palco">
+      {Astro.slots.has('testa') && <header class="tappe__testa"><slot name="testa" /></header>}
+
+      <div class="tappe__nav" role="group" aria-label={etichetta}>
+        <div class="tappe__numeri">
+          {tappe.map((t, i) => <button type="button" class="tappe__num" data-vai={i} aria-label={`Tappa ${i + 1} di ${n}: ${t.titolo}`}><span aria-hidden="true">{romano(i + 1)}</span></button>)}
+        </div>
+        <button type="button" class="tappe__ferma" aria-label={ferma}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg></button>
+      </div>
+
+      {tappe.map((t, i) => (
+        <div class="tappa" data-tappa={i} data-sosta={t.sosta}>
+          <figure class="scena" role="img" aria-label={t.descrizione ?? `La gradinata del tempio vista di fronte: ${n} gradini di marmo salgono verso il frontone. Il gradino ${i + 1} è d'oro${t.robot === 'nessuno' ? '' : ' e un robot ci sta sopra'}.`}>
+            {scene[i] ? <Fragment set:html={scene[i]} /> : <Gradinata n={n} k={i + 1} robot={t.robot} numero={romano(i + 1)} />}
+          </figure>
+          <div class="tappa__testo">
+            <p class="tappa__n" aria-hidden="true">{romano(i + 1)}</p>
+            <h3>{t.titolo}</h3>
+            {(Array.isArray(t.testo) ? t.testo : [t.testo]).map((p) => { const [voce, resto] = conVoce(p); return <p>{voce && <strong>{voce}</strong>}{resto}</p>; })}
+          </div>
+        </div>
+      ))}
+
+      {Astro.slots.has('azione') && <div class="tappe__cta"><slot name="azione" /></div>}
+    </div>
+  </div>
+  {Astro.slots.has('sotto') && <div class="wrap tappe__sotto"><slot name="sotto" /></div>}
+</section>

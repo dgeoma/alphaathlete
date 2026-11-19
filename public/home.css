@@ -1,0 +1,162 @@
+/* alphaathlete.com · home.css
+   Solo i layout che servono alla home e che il kit non aveva: si carica dopo base.css, tempio.css, tappe.css
+   e candidatura.css (css={['tappe','candidatura','home']} in src/pages/index.astro).
+   Stessi token di base.css. Nessun movimento nuovo: tutto usa la comparsa di base (.reveal), una volta sola. */
+
+/* ---------- pezzi comuni ---------- */
+/* etichetta piccola in oro, senza il trattino di .eyebrow: per i titoletti dentro le card */
+.etichetta { margin: 0; font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: 0.14em; line-height: 1.4; text-transform: uppercase; color: var(--gold-text); }
+.su-scuro .etichetta { color: var(--gold-400); }
+.card .etichetta + h3 { margin-top: 10px; }
+.etichetta--centro { text-align: center; }
+/* la «frase in serif» */
+.serif-frase { font-family: var(--serif); font-size: clamp(20px, 2.1vw, 24px); line-height: 1.35; color: var(--ink); text-wrap: balance; }
+.serif-frase--grande { font-size: clamp(24px, 3vw, 34px); line-height: 1.25; }
+/* sul fondo blu le card restano chiare: il loro testo non eredita il bianco */
+.su-scuro .card h3, .su-scuro .card strong { color: var(--ink); }
+.su-scuro .card .etichetta { color: var(--gold-text); }
+.su-scuro .checks li { color: rgba(255, 255, 255, 0.88); }
+
+/* ---------- 1 · apertura: etichetta sopra il titolo ---------- */
+.hero__etichetta { margin-bottom: 14px; }
+.hero__copy h1 { font-size: clamp(36px, 4.2vw, 56px); }
+/* le due frasi del titolo: ognuna sulla sua riga (o a capo da sola, bilanciata), mai spezzate una dentro l'altra */
+.hero__copy h1 span { display: block; }
+
+/* ---------- 2 · #nome: la card che sale, col monogramma ---------- */
+.nome { max-width: 720px; }
+.nome__lambda { display: block; width: auto; height: 34px; margin: 2px auto 14px; color: var(--gold-600); }
+.nome .riquadro__intro { margin-top: 14px; font-size: 17.5px; }
+.nome .riquadro__intro + .riquadro__intro { margin-top: 10px; }
+#nome .riquadro__box { padding-bottom: 36px; }
+
+/* ---------- 3 · #per-chi: testo a sinistra, card a destra ---------- */
+.perchi { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); gap: 64px; align-items: start; }
+.perchi__testo h2 { margin-top: 14px; }
+.perchi__testo h2 + p { margin-top: 24px; }
+.perchi__testo > p:not(.eyebrow):not(.firma) { color: var(--ink-soft); }
+.perchi__testo > p + p { margin-top: 16px; }
+.firma { margin-top: 22px; font-family: var(--serif); font-size: 18px; color: var(--ink); }
+.firma a { display: inline-flex; align-items: center; min-height: 44px; text-decoration-color: var(--gold-500); text-decoration-thickness: 1.5px; text-underline-offset: 5px; }
+.firma a:hover { color: var(--gold-text); }
+.perchi__card { padding: 34px 34px 32px; box-shadow: var(--shadow); }
+.perchi__card .checks { margin-top: 20px; }
+.perchi__card .serif-frase { margin-top: 26px; padding-top: 24px; border-top: 1px solid var(--line); }
+.perchi__fine { margin-top: 22px; }
+.perchi__fine p { font-weight: 600; color: var(--ink); }
+.perchi__fine .btn { margin-top: 20px; }
+@media (min-width: 981px) and (min-height: 700px) { .perchi__card { position: sticky; top: calc(var(--nav-h) + 28px); } }
+
+/* ---------- 4 · #direzione: colonna stretta, testata al centro come le altre sezioni ---------- */
+.direzione { text-align: center; }
+.direzione .eyebrow::after { content: ""; flex: none; width: 22px; height: 2px; background: var(--grad-gold); border-radius: 2px; }
+.direzione h2 { margin-top: 14px; }
+.direzione h2 + p { margin-top: 26px; }
+.direzione > p:not(.eyebrow) { max-width: 680px; margin-inline: auto; }   /* righe da 75-80 caratteri */
+.direzione > p:not(.eyebrow):not(.serif-frase) { font-size: 18px; color: var(--ink-soft); text-align: left; }
+.direzione > p + p { margin-top: 16px; }
+.direzione .serif-frase { margin-top: 36px; padding-top: 30px; border-top: 1px solid rgba(160, 122, 44, 0.4); }
+
+/* ---------- 5 · #fuori-dentro: tre card sul blu ---------- */
+.card__voce { font-family: var(--serif); font-size: 30px; line-height: 1; color: var(--gold-text); }
+.card__voce + h3 { margin-top: 14px; }
+.voci { margin-top: 14px; display: grid; gap: 10px; }
+.voci li { color: var(--ink-soft); }
+/* da 981 px: due colonne. A sinistra «Fuori» sopra «Insieme», a destra «Dentro» alta quanto le due: nessuna card
+   mezza vuota. Nel codice l'ordine resta Fuori, Dentro, Insieme */
+@media (min-width: 981px) {
+  .sistemi { max-width: 1000px; margin-inline: auto; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-areas: "fuori dentro" "insieme dentro"; }
+  .sistemi__fuori { grid-area: fuori; }
+  .sistemi__dentro { grid-area: dentro; }
+  .sistemi__insieme { grid-area: insieme; }
+}
+.sistemi__sotto { max-width: 760px; margin: 40px auto 0; text-align: center; font-size: 17.5px; color: rgba(255, 255, 255, 0.86); }
+
+/* ---------- 6 · #eroi: blocco stretto subito sotto lo stendardo (stesso fondo marmo) ---------- */
+/* Lo stendardo non si tocca: è questo blocco che sale nel suo spazio vuoto in fondo, per stare nello stesso
+   schermo della punta del telo. */
+.eroi { position: relative; z-index: 1; margin-top: -52px; padding: 0 0 104px; background: transparent; }
+.eroi__in { max-width: 640px; text-align: center; color: var(--ink-soft); }
+.eroi__in p { font-size: 18px; }
+.eroi__in .etichetta + p { margin-top: 14px; }
+
+/* ---------- 8 · #settimana ---------- */
+.settimana__sotto { margin-top: 30px; text-align: center; font-size: 17.5px; color: var(--ink-soft); }
+#settimana .portatori { margin-top: 84px; }
+.missioni { text-align: left; padding: 38px 40px 40px; }
+.missioni__testa { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.missioni__testa .etichetta { color: var(--gold-400); }
+.targhetta { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(226, 194, 122, 0.7); font-size: 12px; font-weight: 700; letter-spacing: 0.14em; line-height: 1.4; text-transform: uppercase; color: var(--gold-200); }
+.missioni__grid { margin-top: 24px; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 30px 56px; align-items: start; }
+.missione { font-family: var(--serif); font-size: clamp(18px, 1.9vw, 22px); line-height: 1.4; color: #fff; }
+.missione strong { display: block; margin-bottom: 4px; font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold-400); }
+.missione + .missione { margin-top: 22px; padding-top: 22px; border-top: 1px solid rgba(226, 194, 122, 0.28); }
+.missioni__quando h4 { margin: 0; font-size: 16.5px; font-weight: 700; color: #fff; }
+.missioni__quando .checks { margin-top: 16px; gap: 12px; }
+
+/* ---------- 9 · #regole: le voci apribili col numero romano ---------- */
+.faq--regole summary { display: flex; align-items: baseline; gap: 14px; }
+.faq__n { flex: none; min-width: 1.6em; font-family: var(--serif); font-weight: 400; font-size: 19px; color: var(--gold-text); }
+.faq details > div > p + p { margin-top: 12px; }
+
+/* ---------- 11 · #chi: foto dentro un arco, testo a destra ---------- */
+.chi { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 64px; align-items: center; }
+.chi__foto { margin: 0; width: 100%; max-width: 360px; justify-self: center; }   /* la foto presenta il testo, non lo sovrasta */
+.chi__foto img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 0; border-radius: 240px 240px 28px 28px; box-shadow: 0 0 0 7px var(--bg), 0 0 0 9px rgba(201, 161, 74, 0.55), var(--shadow); }
+.chi__foto figcaption { margin-top: 20px; font-size: 13.5px; color: var(--muted); text-align: center; }
+.chi__testo h2 { margin-top: 14px; }
+.chi__testo h2 + p { margin-top: 22px; }
+.chi__testo > p:not(.eyebrow) { color: var(--ink-soft); }
+.chi__testo .cta-row { margin-top: 30px; }
+
+/* ---------- 14 · #come-si-entra: disegno fermo a sinistra, tre passi a destra, card sotto ---------- */
+.entra { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 56px; align-items: center; }
+.entra__disegno { max-width: 520px; justify-self: center; }
+.entra__passi { display: grid; gap: 26px; }
+.entra__passi li { display: grid; grid-template-columns: 46px minmax(0, 1fr); column-gap: 6px; align-items: start; }
+.entra__passi h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(22px, 2.2vw, 27px); line-height: 1.2; letter-spacing: 0; color: #fff; }
+.entra__n { font-family: var(--serif); font-size: 21px; line-height: 1; padding-top: 7px; color: var(--gold-400); }
+.entra__passi p { margin-top: 8px; color: rgba(255, 255, 255, 0.86); }
+.entra__domande { margin-top: 56px; max-width: 860px; }
+.entra__domande .serif-frase { margin-top: 16px; }
+.entra__domande .serif-frase + .serif-frase { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.entra__riga { margin-top: 20px; font-size: 15.5px; color: var(--ink-soft); }
+.entra__ultima { margin-top: 36px; text-align: center; font-family: var(--serif); font-size: clamp(20px, 2.2vw, 25px); color: #fff; }
+
+/* ---------- tablet ---------- */
+@media (max-width: 980px) {
+  .perchi, .chi, .entra { grid-template-columns: minmax(0, 1fr); gap: 44px; }
+  .chi__foto { max-width: 340px; }
+  .entra__disegno { width: 100%; max-width: 460px; }
+  .missioni__grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- telefono ---------- */
+@media (max-width: 700px) {
+  .hero__etichetta { margin-bottom: 10px; font-size: 12px; letter-spacing: 0.12em; }
+  .hero__copy h1 { font-size: 36px; }
+  .nome__lambda { height: 28px; margin-bottom: 10px; }
+  .nome .riquadro__intro { font-size: 16.5px; }
+  #nome .riquadro__box { padding: 26px 18px 28px; }
+  .perchi__card { padding: 28px 22px; }
+  .perchi__fine .btn { width: 100%; }
+  .direzione > p:not(.eyebrow):not(.serif-frase) { font-size: 17px; }
+  .sistemi__sotto { margin-top: 30px; font-size: 16.5px; }
+  .eroi { margin-top: -42px; padding-bottom: 78px; }
+  .eroi__in p { font-size: 17px; }
+  #settimana .portatori { margin-top: 74px; }
+  .missioni { padding: 28px 20px 30px; }
+  .faq--regole summary { gap: 10px; }
+  .faq__n { font-size: 17px; min-width: 1.5em; }
+  .chi__foto { max-width: 290px; }
+  .chi__testo .cta-row .btn { width: 100%; }
+  .entra { gap: 34px; }
+  .entra__passi li { grid-template-columns: 38px minmax(0, 1fr); }
+  .entra__n { font-size: 19px; padding-top: 6px; }
+  .entra__domande { margin-top: 40px; }
+}
+@media (max-width: 380px) {
+  .hero__copy h1 { font-size: 31px; }
+  .hero__etichetta { margin-bottom: 6px; gap: 8px; font-size: 12px; letter-spacing: 0.06em; }   /* mai sotto i 12 px */
+  .hero__etichetta::before { width: 14px; }
+}

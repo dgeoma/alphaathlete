@@ -1,0 +1,34 @@
+---
+// Fascia che si apre con un frontone (timpano) al posto di una riga dritta.
+//   tono="blu": fascia blu notte col filo d'oro, per una sezione intera (slot libero: titolo, testo, bottoni).
+//   tono="oro": fascia dorata per UNA frase grande (lo slot finisce dentro <p class="fascia__frase">).
+//               Due slot facoltativi, resi col carattere del testo (non col serif della frase):
+//                 sopra = etichetta e righe piccole, prima della frase. Contenuto libero, di solito
+//                         <p class="eyebrow eyebrow--centro">…</p> e uno o più <p>.
+//                 sotto = UNA riga dopo la frase (finisce dentro <p class="fascia__sotto">).
+//               Senza i due slot la fascia è quella di sempre: una sola frase.
+// Nome della sezione per i lettori di schermo:
+//   titoloId = l'id dell'<h2> che sta dentro lo slot (aria-labelledby): è il modo normale, tono blu;
+//   titolo   = solo tono oro, dove un titolo visibile non c'è: scrive un <h2> nascosto (classe sr-only) con quel
+//              testo, così chi salta di titolo in titolo incontra la sezione;
+//   etichetta = ripiego (aria-label) se non c'è né l'uno né l'altro.
+// La sezione che la precede deve essere una .section, un .riquadro o un'altra fascia: il CSS le dà da solo
+// lo spazio in fondo per il timpano.
+interface Props { tono?: 'blu' | 'oro'; id?: string; etichetta?: string; titoloId?: string; titolo?: string; class?: string }
+const { tono = 'blu', id, etichetta, titoloId, titolo, class: classe } = Astro.props;
+const idTitolo = titoloId ?? (titolo && id ? `${id}-t` : undefined);
+---
+{tono === 'oro' ? (
+  <section class:list={['fascia', 'fascia--oro', classe]} id={id} aria-label={idTitolo ? undefined : etichetta} aria-labelledby={idTitolo}>
+    <div class="wrap">
+      {titolo && <h2 class="sr-only" id={idTitolo}>{titolo}</h2>}
+      {Astro.slots.has('sopra') && <div class="fascia__sopra reveal"><slot name="sopra" /></div>}
+      <p class="fascia__frase reveal"><slot /></p>
+      {Astro.slots.has('sotto') && <p class="fascia__sotto reveal"><slot name="sotto" /></p>}
+    </div>
+  </section>
+) : (
+  <section class:list={['fascia', 'fascia--blu', 'su-scuro', classe]} id={id} aria-label={idTitolo ? undefined : etichetta} aria-labelledby={idTitolo}>
+    <div class="wrap"><slot /></div>
+  </section>
+)}

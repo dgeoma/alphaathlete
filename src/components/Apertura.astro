@@ -1,0 +1,56 @@
+---
+// Apertura a tutta pagina: il tempio in costruzione (versione «classica», in alta definizione) sullo sfondo,
+// velo crema sotto il testo a sinistra, due robot in volo nel cielo a destra col loro pulsante di pausa.
+// Sul telefono l'immagine sta in cima e il testo sotto. La pagina che la usa deve passare `cielo` a <Nav>
+// e caricare lo script 'tempio' (js={['tempio']} nel layout).
+//
+// Slot: etichetta (riga piccola sopra il titolo) · titolo (dentro <h1>) · sottotitolo · testo · azione (bottone e nota)
+//       · default (altro, sotto l'azione)
+import SferaArmillare from './SferaArmillare.astro';
+interface Props {
+  id?: string;
+  /** testo alternativo del dipinto (in pagina non si scrive greco: l'iscrizione si dice in italiano) */
+  alt?: string;
+  /** robot in volo + pulsante di pausa (default: sì) */
+  robot?: boolean;
+  /** sfera armillare 3D dietro il titolo, solo desktop (default: no) */
+  sfera?: boolean;
+  /** nome del pulsante di pausa per chi non vede, e nome che prende dopo averlo premuto */
+  pausa?: string;
+  riparti?: string;
+}
+const {
+  id = 'top',
+  alt = 'Il tempio di Apollo a Delfi in costruzione, con l’iscrizione greca «conosci te stesso» sulla fascia blu. Un robot avorio e oro solleva un blocco di marmo con una carrucola, un altro dipinge una colonna da un ponteggio. Dal ponteggio pende uno stendardo blu con l’alloro d’oro.',
+  robot = true,
+  sfera = false,
+  pausa = robot ? 'Ferma i robot' : 'Ferma la sfera che gira',
+  riparti = robot ? 'Fai ripartire i robot' : 'Fai ripartire la sfera',
+} = Astro.props;
+---
+<section class="hero" id={id}>
+  <picture class="hero__scena">
+    <!-- stessa condizione del blocco «telefono, e tablet in verticale» di public/tempio.css -->
+    <source media="(max-width: 700px), (max-width: 980px) and (orientation: portrait)" srcset="/assets/tempio/tempio-alto-m-1000.webp 1000w, /assets/tempio/tempio-alto-m-1400.webp 1400w, /assets/tempio/tempio-alto-m-2000.webp 2000w" sizes="120vw">
+    <img src="/assets/tempio/tempio-alto-1920.webp" srcset="/assets/tempio/tempio-alto-1280.webp 1280w, /assets/tempio/tempio-alto-1920.webp 1920w, /assets/tempio/tempio-alto-2880.webp 2880w, /assets/tempio/tempio-alto-3840.webp 3840w" sizes="100vw" width="3840" height="2394" alt={alt} fetchpriority="high">
+  </picture>
+  {robot && (
+    <div class="hero__cielo" aria-hidden="true">
+      <div class="volo volo--1"><div class="volo__giro"><div class="volo__dondola"><img src="/assets/tempio/robot-volante.webp" width="268" height="400" alt=""><span class="volo__rotore"></span></div></div></div>
+      <div class="volo volo--2"><div class="volo__giro"><div class="volo__dondola"><img src="/assets/tempio/robot-volante.webp" width="268" height="400" alt=""><span class="volo__rotore"></span></div></div></div>
+    </div>
+  )}
+  <div class="wrap hero__grid">
+    <div class="hero__copy">
+      {sfera && <SferaArmillare />}
+      {/* niente .reveal qui: il primo schermo non deve aspettare main.js. «hero__entra» è un'animazione CSS che parte da sola */}
+      {Astro.slots.has('etichetta') && <p class="eyebrow hero__etichetta hero__entra"><slot name="etichetta" /></p>}
+      <h1 class="hero__entra" style="--d:.08s"><slot name="titolo" /></h1>
+      {Astro.slots.has('sottotitolo') && <p class="hero__sub hero__entra" style="--d:.14s"><slot name="sottotitolo" /></p>}
+      {Astro.slots.has('testo') && <p class="hero__lead hero__entra" style="--d:.2s"><slot name="testo" /></p>}
+      {Astro.slots.has('azione') && <div class="hero__cta hero__entra" style="--d:.26s"><slot name="azione" /></div>}
+      <slot />
+    </div>
+  </div>
+  {(robot || sfera) && <button class="volo__pausa" type="button" aria-label={pausa} data-pausa={pausa} data-riparti={riparti}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>}
+</section>

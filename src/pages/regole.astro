@@ -1,0 +1,34 @@
+---
+// Le regole della casa, tutte aperte. Copy v2 §6.3 (testata) e §3.9 (le regole). Ci arrivano il passo 11 del
+// questionario (link in un'altra scheda) e il footer. I testi stanno in src/data/regole.ts, lo stesso file che legge la home.
+// Niente bottone nel menu: chi arriva dal questionario ha già una candidatura aperta nell'altra scheda.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import FooterSito from '../components/FooterSito.astro';
+import { META } from '../config';
+import { regole, romano, testataRegole } from '../data/regole';
+---
+<Base titolo="Le regole della casa · Alpha Athlete" descrizione={META.descrizione} ogTitolo={META.ogTitolo} ogDescrizione={META.ogDescrizione} ogImmagine={META.ogImmagine} ogImmagineAlt={META.ogImmagineAlt} percorso="/regole/" noindex>
+  <Nav slot="nav" logoHref="/" cta={false} />
+  <article class="pagina-testo">
+    <div class="wrap wrap--narrow">
+      <p class="eyebrow">{testataRegole.etichetta}</p>
+      <h1>{testataRegole.titolo}</h1>
+      <p class="pagina-testo__lead">{testataRegole.rigaPagina}</p>
+
+      <ol class="regole" role="list">
+        {regole.map((r, i) => (
+          <li class="regola" id={`regola-${i + 1}`}>
+            <h2><span class="regola__n" aria-hidden="true">{romano(i + 1)}</span><span class="sr-only">{i + 1}. </span>{r.titolo}</h2>
+            {r.testo.map((p) => <p>{p}</p>)}
+            <p><strong>Perché:</strong> {r.perche}</p>
+            <p><strong>{r.se.etichetta}:</strong> {r.se.testo}</p>
+          </li>
+        ))}
+      </ol>
+
+      <div class="cta-row"><a class="link-arrow" href="/">Torna alla pagina di Alpha Athlete</a></div>
+    </div>
+  </article>
+  <FooterSito slot="footer" />
+</Base>

@@ -1,0 +1,17 @@
+---
+// Il piè di pagina del sito, uguale su tutte le pagine: link e righe stanno qui, in un posto solo.
+// `home` = siamo nella home: il logo torna su e «Candidati» punta all'ancora della stessa pagina.
+// Le due righe sono quelle del copy v2 §3.17: si cambiano qui, una volta.
+import Footer from './Footer.astro';
+interface Props { home?: boolean }
+const { home = false } = Astro.props;
+const link = [
+  { href: home ? '#candidatura' : '/#candidatura', label: 'Candidati' },
+  { href: '/regole/', label: 'Le regole della casa' },
+  { href: '/privacy/', label: 'Privacy' },
+];
+---
+<Footer logoHref={home ? '#top' : '/'} link={link} etichetta="Pagine e note legali">
+  Alpha Athlete è una community di Alpha Group.
+  <Fragment slot="legale">Titolare del trattamento dei dati: Alpha Consulting Group FZE (Alpha Group), Emirati Arabi Uniti. © 2026 Alpha Consulting Group FZE</Fragment>
+</Footer>

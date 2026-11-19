@@ -1,0 +1,70 @@
+---
+// Pagina di arrivo dopo il questionario: ci finiscono tutti, nessuno viene scartato a schermo. Copy v2 §6.1.
+// Pagina corta su marmo: menu senza bottone, un riquadro col robot che indica sul bordo, nessun'altra azione.
+// Il nome arriva dal questionario (sessionStorage, solo in questa scheda): la pagina lo legge, lo mostra e
+// SUBITO lo cancella. Senza nome il titolo è «Candidatura ricevuta.».
+// Se si arriva qui da un invio di PROVA (webhook vuoto: public/candidatura.js lascia «candidatura.prova» in
+// sessionStorage) la pagina lo dice in chiaro, su qualunque indirizzo: etichetta e titolo cambiano, perché niente
+// è partito. Il payload a schermo si vede solo sul computer di chi sviluppa. Poi «candidatura.prova» si cancella.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Riquadro from '../components/Riquadro.astro';
+import FooterSito from '../components/FooterSito.astro';
+import { CONFERMA_EMAIL } from '../config';
+import { META } from '../config';
+---
+<Base titolo="Candidatura ricevuta · Alpha Athlete" descrizione={META.descrizione} ogTitolo={META.ogTitolo} ogDescrizione={META.ogDescrizione} ogImmagine={META.ogImmagine} ogImmagineAlt={META.ogImmagineAlt} percorso="/grazie/" noindex>
+  <Nav slot="nav" logoHref="/" cta={false} />
+  <Riquadro robot titoloId="grazie-t" class="riquadro--pagina">
+    <div class="servizio">
+      <p class="eyebrow" data-grazie-etichetta>Candidatura inviata</p>
+      <!-- col nome: «Candidatura ricevuta, Nome.» · senza nome: «Candidatura ricevuta.» (virgola e nome li mette lo script) -->
+      <h1 id="grazie-t">Candidatura ricevuta<span class="grazie__nome"></span>.</h1>
+      <p>Adesso tocca a me. Leggo tutto quello che hai scritto, da solo, e ti rispondo per email. Per questo non ti do una data: ti scrivo appena ho letto.</p>
+      <ul class="passi">
+        <li><b>Se vedo che possiamo essere giusti l’uno per l’altra,</b> ti invito a una videochiamata con me. Lì ci conosciamo e decidiamo in due.</li>
+        <li><b>Se vedo che non è il momento,</b> te lo scrivo con il motivo. Potrai candidarti di nuovo.</li>
+      </ul>
+      {CONFERMA_EMAIL ? (
+        <Fragment>
+          <p>Intanto non devi fare niente. Ti arriva una email di conferma: se ti viene in mente una cosa da aggiungere, rispondi a quella. Arriva a me.</p>
+          <p class="servizio__piccola">Se la conferma non si vede, guarda nella posta indesiderata o nelle promozioni.</p>
+        </Fragment>
+      ) : (
+        <p>Intanto non devi fare niente.</p>
+      )}
+      <p class="servizio__firma">Un caro saluto, George</p>
+      <div class="cta-row"><a class="link-arrow" href="/">Torna alla pagina di Alpha Athlete</a></div>
+      <pre class="grazie__prova" hidden></pre>
+    </div>
+  </Riquadro>
+  <FooterSito slot="footer" />
+  <style slot="head" is:inline>
+    .grazie__prova { margin: 28px 0 0; padding: 14px 16px; overflow-x: auto; border-radius: 12px; border: 1px dashed var(--gold-600); font-size: 13px; line-height: 1.5; color: var(--gold-text); white-space: pre-wrap; overflow-wrap: anywhere; }
+  </style>
+  <script is:inline>
+    (function () {
+      try {
+        var n = (sessionStorage.getItem('candidatura.nome') || '').trim();
+        if (n) document.querySelector('.grazie__nome').textContent = ', ' + n;
+        sessionStorage.removeItem('candidatura.nome');   /* mostrato una volta, poi via: sul dispositivo non resta niente */
+        /* invio di prova (webhook vuoto): la pagina NON conferma. Lo dice su ogni indirizzo */
+        var p = sessionStorage.getItem('candidatura.prova'), box = document.querySelector('.grazie__prova');
+        if (p) {
+          sessionStorage.removeItem('candidatura.prova');   /* nome, email e risposte non restano in memoria */
+          var et = document.querySelector('[data-grazie-etichetta]'), h1 = document.getElementById('grazie-t');
+          if (et) et.textContent = 'Modalità prova';
+          if (h1) h1.textContent = 'Prova: questa candidatura non è partita.';
+          document.title = 'Prova: candidatura non partita · Alpha Athlete';
+          var host = location.hostname.replace(/^\[|\]$/g, '');
+          if (box) {
+            box.hidden = false;
+            /* il payload a schermo solo sul computer di chi sviluppa */
+            box.textContent = 'Modalità prova: il webhook è vuoto, niente è partito in rete. Il resto della pagina è quello che vedrà chi invia davvero.' +
+              (host === 'localhost' || host === '127.0.0.1' || host === '::1' ? '\nPayload:\n' + JSON.stringify(JSON.parse(p), null, 2) : '');
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
+</Base>

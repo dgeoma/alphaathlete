@@ -1,0 +1,17 @@
+{
+  "name": "alphaathlete",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "devDependencies": {
+    "@types/three": "^0.187.0",
+    "astro": "^5.18.2"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  }
+}

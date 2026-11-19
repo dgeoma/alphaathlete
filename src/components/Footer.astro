@@ -1,0 +1,26 @@
+---
+// Piè di pagina neutro: logo, link, una riga libera e la riga legale. Nessun dato scritto qui dentro.
+import Lambda from './Lambda.astro';
+interface Voce { href: string; label: string; rel?: string }
+interface Props {
+  /** dove porta il logo: '#top' in home, '/' altrove */
+  logoHref?: string;
+  /** link (contatti, privacy…) */
+  link?: Voce[];
+  /** etichetta della lista dei link per chi usa un lettore di schermo */
+  etichetta?: string;
+}
+const { logoHref = '/', link = [], etichetta = 'Contatti e note legali' } = Astro.props;
+---
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <a class="wordmark" href={logoHref} aria-label={logoHref.startsWith('#') ? 'Alpha Athlete, torna su' : 'Alpha Athlete, pagina iniziale'}><Lambda class="wordmark__lambda" /><span>Alpha Athlete</span></a>
+    {link.length > 0 && (
+      <nav class="footer__links" aria-label={etichetta}>
+        {link.map((l) => <a href={l.href} rel={l.rel}>{l.label}</a>)}
+      </nav>
+    )}
+    {Astro.slots.has('default') && <p class="footer__extra"><slot /></p>}
+    {Astro.slots.has('legale') && <p class="footer__legal"><slot name="legale" /></p>}
+  </div>
+</footer>

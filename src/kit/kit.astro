@@ -1,0 +1,254 @@
+---
+// KIT: ogni pattern del sito, con testo segnaposto dichiarato. Non è la home e non va nei motori di ricerca.
+// ESISTE SOLO CON `npm run dev` (http://localhost:4321/kit/): il build non lo scrive in dist/, quindi non va online.
+// La rotta la aggiunge astro.config.mjs; per questo il file sta in src/kit/ e non in src/pages/.
+// Il suo questionario è `prova`: il webhook vero non gli arriva mai.
+// Serve a montare la home in fretta: si copia il blocco che serve e si cambia il testo.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Apertura from '../components/Apertura.astro';
+import Riquadro from '../components/Riquadro.astro';
+import Portatori from '../components/Portatori.astro';
+import Frontone from '../components/Frontone.astro';
+import Tappe from '../components/Tappe.astro';
+import Questionario from '../components/Questionario.astro';
+import ScenaFinale from '../components/ScenaFinale.astro';
+import Stendardo from '../components/Stendardo.astro';
+import { titoliRegole } from '../data/regole';
+
+const ancore = [
+  { href: '#card', label: 'Card' },
+  { href: '#stendardo', label: 'Stendardo' },
+  { href: '#tappe', label: 'Tappe' },
+  { href: '#perchi', label: 'Per chi' },
+  { href: '#domande', label: 'Domande' },
+];
+
+// 6 tappe finte. Il robot, se non lo dici, alterna «indica» e «portatori»; l'ultima qui usa «progetto».
+// `testo` può essere una riga sola o una lista di paragrafi. Se un paragrafo comincia con una parola seguita da
+// due punti, quella parola esce in grassetto (le prime due tappe lo mostrano: quattro paragrafi brevi).
+const quattro = [
+  'Dentro: riga di prova, breve, sul lavoro interiore.',
+  'Fuori: riga di prova, breve, sul mestiere.',
+  'Insieme: riga di prova, breve, sul gruppo.',
+  'Missione: riga di prova, breve, sulla consegna.',
+];
+const tappe = [
+  { titolo: 'Titolo di prova della prima tappa.', testo: quattro },
+  { titolo: 'Titolo di prova della seconda tappa.', testo: quattro },
+  { titolo: 'Titolo di prova della terza tappa.', testo: 'Testo segnaposto: ogni scena si anima una volta sola e chi torna indietro la trova finita.' },
+  { titolo: 'Titolo di prova della quarta tappa.', testo: 'Testo segnaposto: si cambia tappa con la rotella, con PagGiù e PagSu, o toccando i numeri romani.' },
+  { titolo: 'Titolo di prova della quinta tappa.', testo: 'Testo segnaposto: se resti fermo, dopo qualche secondo il palco passa da solo alla tappa dopo.' },
+  { titolo: 'Titolo di prova della sesta tappa.', testo: 'Testo segnaposto: all’ultima tappa la porta del tempio si illumina.', robot: 'progetto' as const },
+];
+
+// 6 passi finti: uno per tipo, con tutte le aggiunte del motore (gruppo, riga di passaggio, campo in più, elenco,
+// link in un'altra scheda, errore del passo, spunta della maggiore età). Schema completo: public/candidatura.js.
+// La spunta delle lettere c'è nei dati, ma <Questionario> la toglie finché LETTERE_ATTIVE è false (src/config.ts).
+// Per vedere l'errore d'invio e il bottone «Riprova»: apri /kit/?prova=errore (solo in locale, niente rete).
+const candidatura = {
+  versione: 'kit-prova',
+  intro: 'Testo segnaposto: due righe che dicono cosa succede dopo aver risposto. Il copy vero arriva dopo.',
+  passi: [
+    { chiave: 'prova_singola', tipo: 'singola' as const, gruppo: 'Primo gruppo di prova', titolo: 'Domanda di prova a scelta singola?', aiuto: 'Riga di aiuto di prova: dopo la scelta si va avanti da soli. Nel payload parte il valore, non l’etichetta.',
+      opzioni: [{ valore: 'prima', etichetta: 'Prima risposta di prova' }, { valore: 'seconda', etichetta: 'Seconda risposta di prova', nota: 'Con una riga piccola sotto' }, { valore: 'terza', etichetta: 'Terza risposta di prova' }] },
+    { chiave: 'prova_testo', tipo: 'testo' as const, gruppo: 'Primo gruppo di prova', titolo: 'Domanda di prova con risposta breve?', aiuto: 'Al massimo 80 caratteri. Sotto c’è un campo in più, facoltativo.', max: 80, segnaposto: 'Risposta di prova',
+      extra: { chiave: 'link_facoltativo', etichetta: 'Campo in più di prova: un link', max: 200 } },
+    { chiave: 'prova_multipla', tipo: 'multipla' as const, gruppo: 'Primo gruppo di prova', titolo: 'Domanda di prova a scelta multipla?', aiuto: 'Puoi sceglierne fino a due.', max: 2, opzioni: ['Scelta di prova uno', 'Scelta di prova due', 'Scelta di prova tre', 'Scelta di prova quattro'] },
+    { chiave: 'prova_testo_lungo', tipo: 'testo_lungo' as const, gruppo: 'Secondo gruppo di prova', sopra: 'Riga di passaggio di prova: da qui in avanti cambia il tipo di domande.',
+      titolo: 'Domanda di prova con risposta lunga?', aiuto: 'Almeno 10 caratteri, al massimo 400.', min: 10, max: 400, segnaposto: 'Testo di prova: qui si scrive qualche riga.' },
+    { chiave: 'prova_spunta', tipo: 'spunta' as const, gruppo: 'Terzo gruppo di prova', titolo: 'Conferma di prova.', aiuto: 'Un passo con un elenco, un link e una sola casella da spuntare.',
+      elenco: titoliRegole, link: { href: '/regole/', testo: 'Link di prova: leggi tutto in un’altra scheda' },
+      opzioni: ['Testo di prova accanto alla casella: ho letto e sono d’accordo.'],
+      extra: { chiave: 'prova_note', etichetta: 'Campo in più di prova: una nota', max: 300 },
+      errore: 'Messaggio di prova del passo: senza la spunta non si va avanti.' },
+    { chiave: 'contatti', tipo: 'contatti' as const, gruppo: 'Quarto gruppo di prova', titolo: 'Ultimo passo di prova: i tuoi contatti.', aiuto: 'Riga di aiuto di prova. Il telefono è facoltativo.',
+      maggiorenne: { testo: 'Testo di prova della spunta sulla maggiore età (obbligatoria).' },
+      privacy: { testo: 'Testo di prova del consenso sulla privacy (obbligatorio).', link: '/privacy/', link_testo: 'Link di prova all’informativa' },
+      lettere: { testo: 'Testo di prova del consenso alle lettere via email.' } },
+  ],
+  invio: { etichetta: 'Invia (prova)', destinazione: '/grazie/', fonte: 'alphaathlete.com · kit' },
+  errori: { invio: 'Messaggio di prova: l’invio non è riuscito. Le risposte sono ancora qui: premi «Riprova».' },
+};
+---
+<Base
+  titolo="Kit · Alpha Athlete"
+  descrizione="Pagina di lavoro: tutti i componenti del sito con testo segnaposto."
+  percorso="/kit/"
+  noindex
+  css={['tappe', 'candidatura']}
+  js={['tempio', 'tappe', 'candidatura']}
+>
+  <Nav slot="nav" ancore={ancore} logoHref="#top" cielo />
+
+  <!-- 1 · APERTURA: scena a tutta pagina, robot in volo con pausa, sfera armillare (solo desktop) -->
+  <Apertura sfera>
+    <Fragment slot="titolo">Titolo di prova,<br>su due righe.</Fragment>
+    <Fragment slot="sottotitolo">Sottotitolo di prova, in oro scuro.</Fragment>
+    <Fragment slot="testo">Testo segnaposto: una o due righe che dicono cosa c’è qui. Il copy vero arriva dopo.</Fragment>
+    <Fragment slot="azione">
+      <a class="btn" href="#candidatura">Candidati</a>
+      <p class="cta-note">Nota di prova sotto il bottone.</p>
+    </Fragment>
+  </Apertura>
+
+  <!-- 2 · RIQUADRO che sale sopra l'apertura, col robot che indica -->
+  <Riquadro id="riquadro" sale robot titoloId="riquadro-t">
+    <div class="riquadro__head">
+      <p class="eyebrow">Kit · riquadro che sale</p>
+      <h2 id="riquadro-t">Titolo di prova del riquadro.</h2>
+      <p class="riquadro__intro">Testo segnaposto: questo riquadro sale sopra il fondo dell’apertura e porta il robot che indica sul bordo. Nella home qui può stare il questionario.</p>
+    </div>
+    <div class="cta-center"><a class="btn" href="#candidatura">Candidati</a><p class="cta-note">Nota di prova.</p></div>
+  </Riquadro>
+
+  <!-- 3 · ROBOT PORTATORI: camminano sopra la banda blu solo mentre scorri -->
+  <section class="section section--attaccata" aria-label="Kit: robot portatori">
+    <div class="wrap">
+      <Portatori>
+        <div class="banda su-scuro reveal">
+          <p class="banda__frase">Frase di prova nella banda blu: i due portatori ci camminano sopra mentre scorri.</p>
+        </div>
+      </Portatori>
+    </div>
+  </section>
+
+  <!-- 4 · FASCIA BLU con frontone e filo d'oro -->
+  <Frontone tono="blu" id="fascia-blu">
+    <header class="section__head reveal">
+      <p class="eyebrow">Kit · fascia blu con frontone</p>
+      <h2>Titolo di prova sulla fascia blu.</h2>
+      <p>Testo segnaposto: la fascia si apre con un timpano e un filo d’oro, al posto di una riga dritta.</p>
+    </header>
+    <div class="cta-center reveal"><a class="btn" href="#candidatura">Candidati</a><p class="cta-note">Nota di prova sotto il bottone.</p></div>
+  </Frontone>
+
+  <!-- 5 · FASCIA ORO: una sola frase -->
+  <Frontone tono="oro" etichetta="Kit: fascia oro">Frase di prova sulla fascia oro: una sola, grande, <strong>con una parte che chiude.</strong></Frontone>
+
+  <!-- 5b · FASCIA ORO con i due slot facoltativi: `sopra` (etichetta e righe piccole) e `sotto` (una riga) -->
+  <Frontone tono="oro" id="fascia-oro" etichetta="Kit: fascia oro con righe sopra e sotto">
+    <Fragment slot="sopra">
+      <p class="eyebrow eyebrow--centro">Kit · etichetta di prova</p>
+      <p>Righe piccole di prova sopra la frase: due o tre frasi brevi, col carattere del testo.</p>
+    </Fragment>
+    Frase di prova sulla fascia oro, grande, con le righe piccole sopra e sotto.
+    <Fragment slot="sotto">Riga di prova sotto la frase.</Fragment>
+  </Frontone>
+
+  <!-- 6 · SEZIONE CHIARA con card -->
+  <section class="section" id="card">
+    <div class="wrap">
+      <header class="section__head reveal">
+        <p class="eyebrow">Kit · sezione chiara con card</p>
+        <h2>Titolo di prova della sezione.</h2>
+        <p>Testo segnaposto sotto il titolo: una riga, due al massimo.</p>
+      </header>
+      <div class="cards cards--3">
+        <article class="card reveal"><p class="card__num" aria-hidden="true">I</p><h3>Titolo di prova della card</h3><p>Testo segnaposto della prima card: tre righe che spiegano una cosa sola.</p></article>
+        <article class="card reveal" style="--d:.08s"><p class="card__num" aria-hidden="true">II</p><h3>Titolo di prova della card</h3><p>Testo segnaposto della seconda card: tre righe che spiegano una cosa sola.</p></article>
+        <article class="card reveal" style="--d:.16s"><p class="card__num" aria-hidden="true">III</p><h3>Titolo di prova della card</h3><p>Testo segnaposto della terza card: tre righe che spiegano una cosa sola.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · SEZIONE CHIARA (fondo alternato) con una card larga, elenco e bottone; poi due card affiancate con le spunte -->
+  <section class="section section--soft" id="checks">
+    <div class="wrap center">
+      <p class="eyebrow reveal">Kit · card larga con elenco</p>
+      <h2 class="reveal" style="margin-top:14px">Domanda di prova come titolo?</h2>
+    </div>
+    <div class="wrap" style="margin-top:44px">
+      <div class="card card--larga card--ferma reveal">
+        <ul class="checks checks--dot" style="margin-top:0">
+          <li>Prima riga di prova, con il pallino.</li>
+          <li>Seconda riga di prova, un po’ più lunga della prima per vedere come va a capo.</li>
+          <li>Terza riga di prova.</li>
+        </ul>
+        <div class="card__fine">
+          <p>Frase di prova che chiude la card e porta al bottone.</p>
+          <a class="btn" href="#candidatura">Candidati</a>
+        </div>
+      </div>
+      <div class="cards" style="margin-top:24px">
+        <article class="card reveal"><h3>Card di prova con le spunte</h3><ul class="checks"><li>Voce di prova con la spunta oro.</li><li>Seconda voce di prova.</li></ul></article>
+        <article class="card reveal" style="--d:.08s"><h3>Card di prova con le spunte</h3><ul class="checks"><li>Voce di prova con la spunta oro.</li><li>Seconda voce di prova.</li></ul></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7b · STENDARDO: il telo si srotola una volta sola. Qui con le parole predefinite del componente. -->
+  <Stendardo id="stendardo" />
+
+  <!-- 8 · PALCO A TAPPE: 6 tappe finte, scena predefinita (gradinata del tempio).
+       Le prime due hanno quattro paragrafi con la prima parola in grassetto. -->
+  <Tappe id="tappe" tappe={tappe} etichetta="Le sei tappe di prova">
+    <Fragment slot="testa">
+      <p class="eyebrow">Kit · palco a tappe</p>
+      <h2>Titolo di prova del percorso.</h2>
+      <p class="tappe__lead">Riga di prova sotto il titolo del palco.</p>
+    </Fragment>
+    <a slot="azione" class="btn" href="#candidatura">Candidati</a>
+  </Tappe>
+
+  <!-- 9 · FA PER TE / NON FA PER TE -->
+  <section class="section" id="perchi">
+    <div class="wrap">
+      <header class="section__head reveal">
+        <p class="eyebrow">Kit · per chi è</p>
+        <h2>Titolo di prova: meglio dirselo prima.</h2>
+      </header>
+      <div class="fit">
+        <div class="fit__col reveal">
+          <h3>Fa per te se</h3>
+          <ul class="checks">
+            <li>Prima condizione di prova.</li>
+            <li>Seconda condizione di prova, un po’ più lunga.</li>
+            <li>Terza condizione di prova.</li>
+          </ul>
+        </div>
+        <div class="fit__col fit__col--no reveal" style="--d:.08s">
+          <h3>Non fa per te se</h3>
+          <ul class="checks checks--x">
+            <li>Prima esclusione di prova.</li>
+            <li>Seconda esclusione di prova, un po’ più lunga.</li>
+            <li>Terza esclusione di prova.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · DOMANDE (FAQ con <details>) -->
+  <section class="section section--soft" id="domande">
+    <div class="wrap">
+      <header class="section__head reveal">
+        <p class="eyebrow">Kit · domande</p>
+        <h2>Titolo di prova delle domande.</h2>
+      </header>
+      <div class="faq">
+        <details class="reveal"><summary>Prima domanda di prova?</summary><div><p>Risposta di prova: due o tre righe, senza giri di parole.</p></div></details>
+        <details class="reveal"><summary>Seconda domanda di prova, un po’ più lunga per vedere come va a capo sul telefono?</summary><div><p>Risposta di prova: due o tre righe, senza giri di parole.</p></div></details>
+        <details class="reveal"><summary>Terza domanda di prova?</summary><div><p>Risposta di prova: due o tre righe, senza giri di parole.</p></div></details>
+      </div>
+      <p class="faq__more reveal">Riga di prova sotto le domande, <a href="#candidatura">con un link al questionario</a>.</p>
+    </div>
+  </section>
+
+  <!-- 11 · QUESTIONARIO: 6 passi finti, uno per tipo, con tutte le aggiunte. Qui il questionario è `prova`: niente rete, mai. -->
+  <Questionario dati={candidatura} prova>
+    <Fragment slot="etichetta">Kit · questionario</Fragment>
+    <Fragment slot="titolo">Titolo di prova del questionario.</Fragment>
+    <Fragment slot="nota">Nota di prova sotto il modulo: dove finiscono le risposte e chi le legge.</Fragment>
+    <Fragment slot="senza-js">Testo di prova per chi ha JavaScript spento: il questionario non parte, qui va un recapito.</Fragment>
+  </Questionario>
+
+  <!-- 12 · SCENA FINALE con la greca sottile -->
+  <ScenaFinale>Frase di prova sopra la scena finale.</ScenaFinale>
+
+  <Footer slot="footer" logoHref="#top" link={[{ href: '#candidatura', label: 'Candidati' }, { href: '/regole/', label: 'Regole' }, { href: '/privacy/', label: 'Privacy' }, { href: '/grazie/', label: 'Grazie' }, { href: '/', label: 'Pagina iniziale' }]}>
+    Riga libera di prova nel footer, <a href="#candidatura">con un link</a>.
+    <Fragment slot="legale">Riga legale di prova · testo segnaposto.</Fragment>
+  </Footer>
+</Base>

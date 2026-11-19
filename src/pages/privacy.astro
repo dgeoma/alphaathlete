@@ -1,0 +1,69 @@
+---
+// /privacy/ · BOZZA DICHIARATA. Il copy (v2 §6.4) dà solo una SCALETTA con l'avvertenza «serve un legale»: qui è
+// pubblicata così, come bozza, senza una sola clausola inventata. Il testo vero lo scrive o lo rivede un legale:
+// finché non c'è, il sito non si pubblica (README, «Prima di pubblicare»).
+// Rispetto alla scaletta di v2 sono stati tolti solo i rimandi interni al documento di lavoro (le sigle delle
+// decisioni e «vedi §9»): al loro posto c'è scritto che il punto è ancora da decidere. Nessuna frase aggiunta.
+// Niente bottone nel menu: chi arriva dal questionario ha già una candidatura aperta nell'altra scheda.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import FooterSito from '../components/FooterSito.astro';
+import { META } from '../config';
+
+const sezioni = [
+  { id: 'chi', titolo: 'Chi tratta i dati',
+    testo: 'Titolare: Alpha Consulting Group FZE, Emirati Arabi Uniti. Alpha Athlete è una sua community. Recapito per ogni richiesta: un indirizzo email, ancora da decidere.' },
+  { id: 'cosa', titolo: 'Cosa si raccoglie con la candidatura',
+    testo: 'Le risposte alle dodici schermate, cioè testi liberi su gare, lavoro e scelte, e la domanda facoltativa per George. Nome, cognome, email, telefono se dato. Le due spunte: maggiore età e privacy. Data dell’invio e pagina di provenienza.' },
+  { id: 'cosa-no', titolo: 'Cosa non si chiede',
+    testo: 'Nessuna domanda su salute, diagnosi, terapie, orientamento, religione, politica. Nel campo dove è più facile che succeda (la sconfitta, passo 6) il modulo dice che di infortuni e di salute non serve scrivere. Se una persona ne scrive lo stesso, di sua iniziativa, va detto come viene trattato quel testo.' },
+  { id: 'dispositivo', titolo: 'Cosa resta sul dispositivo',
+    testo: 'Una bozza delle risposte nella memoria della scheda del browser, cancellata quando la scheda si chiude e all’invio. Dopo l’invio resta solo il nome, per il titolo della pagina di conferma, che lo cancella appena lo ha mostrato. Niente raggiunge un server finché non si preme «Invia la candidatura». Il sito non usa strumenti di tracciamento né script di terzi: da riconfermare il giorno della pubblicazione.' },
+  { id: 'perche', titolo: 'Perché si raccolgono',
+    testo: 'Per valutare la candidatura e rispondere.' },
+  { id: 'dove', titolo: 'Dove vanno',
+    testo: 'Nell’account HighLevel del titolare, su server fuori dall’Unione Europea. L’accordo sul trattamento dei dati offerto dalla piattaforma va letto dal legale.' },
+  { id: 'chi-legge', titolo: 'Chi le legge',
+    testo: 'George Dragos Matei, di persona. Se un’AI le legge o le riassume, o se un giorno a rispondere sarà un’AI, va dichiarato qui e in ogni messaggio, prima che succeda: la scelta è ancora da fare.' },
+  { id: 'quanto', titolo: 'Per quanto si tengono',
+    testo: 'Tempi distinti per due casi: chi entra, e chi riceve un «non adesso». I tempi sono ancora da decidere.' },
+  { id: 'cancellazione', titolo: 'Come chiedere la cancellazione',
+    testo: 'Una email al recapito del punto 1: per avere copia dei dati, correggerli, cancellarli, ritirare il consenso. Entro quanto si risponde lo fissa il legale.' },
+  { id: 'eta', titolo: 'Età',
+    testo: 'Solo chi ha compiuto 18 anni.' },
+  { id: 'colloqui', titolo: 'Colloqui e chiamate di gruppo',
+    testo: 'Non si registrano senza consenso. Se le chiamate di gruppo si registrano, dove resta la registrazione e chi la vede: la scelta è ancora da fare, e deve stare insieme alla regola V.' },
+  { id: 'fuori', titolo: 'Cosa questa pagina non copre',
+    testo: 'Le condizioni di adesione e pagamento, che si ricevono per iscritto dopo un sì, e le regole del gruppo, che stanno in /regole/.' },
+];
+---
+<Base titolo="Privacy · Alpha Athlete" descrizione={META.descrizione} ogTitolo={META.ogTitolo} ogDescrizione={META.ogDescrizione} ogImmagine={META.ogImmagine} ogImmagineAlt={META.ogImmagineAlt} percorso="/privacy/" noindex>
+  <Nav slot="nav" logoHref="/" cta={false} />
+  <article class="pagina-testo">
+    <div class="wrap wrap--narrow">
+      <p class="eyebrow">Privacy · bozza</p>
+      <h1>Privacy: scaletta dell’informativa</h1>
+      <p class="bozza" role="note"><strong>Bozza.</strong> Questa è una scaletta, non un’informativa. Il testo vero lo scrive o lo rivede un legale. Tutto ciò che segue sul piano legale è una deduzione di lavoro: nessuno ha letto le norme.</p>
+
+      <nav class="sommario" aria-labelledby="sommario-t">
+        <h2 id="sommario-t">In questa pagina</h2>
+        <ol>
+          {sezioni.map((s) => <li><a href={`#${s.id}`}>{s.titolo}</a></li>)}
+        </ol>
+      </nav>
+
+      {sezioni.map((s, i) => (
+        <section id={s.id} aria-labelledby={`${s.id}-t`}>
+          <h2 id={`${s.id}-t`}><span class="num">{i + 1}.</span> {s.titolo}</h2>
+          <p>{s.id === 'fuori' ? <Fragment>Le condizioni di adesione e pagamento, che si ricevono per iscritto dopo un sì, e le regole del gruppo, che stanno in <a href="/regole/">/regole/</a>.</Fragment> : s.testo}</p>
+        </section>
+      ))}
+
+      <div class="cta-row"><a class="link-arrow" href="/">Torna alla pagina di Alpha Athlete</a></div>
+    </div>
+  </article>
+  <FooterSito slot="footer" />
+  <style slot="head" is:inline>
+    .bozza { margin-top: 22px; padding: 16px 20px; border-radius: 14px; border: 1px dashed var(--gold-600); background: var(--carta); color: var(--ink); font-size: 16.5px; }
+  </style>
+</Base>

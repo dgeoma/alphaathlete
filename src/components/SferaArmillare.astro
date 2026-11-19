@@ -1,0 +1,27 @@
+---
+// Sfera armillare in Three.js dietro il titolo dell'apertura: polvere d'oro sparsa che si ricompone
+// una volta sola in una sfera armillare. Poi ruota piano; lo scroll la fa girare.
+// Solo da 981 px in su, con WebGL2, mai con «Riduci movimento»: altrove resta la pagina di sempre.
+// Three.js si scarica dopo che la pagina è pronta. Gli stili (.sfera) stanno in public/tempio.css.
+// Dipende da .hero (per fermarsi fuori schermo) e da .volo__pausa (il pulsante che la ferma): li scrive <Apertura>.
+---
+<canvas class="sfera" aria-hidden="true"></canvas>
+
+<script>
+  const canvas = document.querySelector<HTMLCanvasElement>('canvas.sfera');
+  const ok = canvas
+    && matchMedia('(min-width: 981px)').matches
+    && !matchMedia('(prefers-reduced-motion: reduce)').matches
+    && (() => { try { const gl = document.createElement('canvas').getContext('webgl2'); gl?.getExtension('WEBGL_lose_context')?.loseContext(); return !!gl; } catch { return false; } })();
+
+  const avvia = async () => {
+    if (!ok || !canvas || !document.documentElement.classList.contains('js')) return;   // senza il resto del JS non c'è il pulsante di pausa
+    const { avvia: parti } = await import('../scripts/sfera3d');
+    parti(canvas);
+  };
+
+  if (ok) {
+    const via = () => ('requestIdleCallback' in window ? requestIdleCallback(() => avvia(), { timeout: 1500 }) : setTimeout(avvia, 300));
+    if (document.readyState === 'complete') via(); else addEventListener('load', via, { once: true });
+  }
+</script>

@@ -1,0 +1,75 @@
+---
+// La riga per lasciare l'email (#lettere): fra la greca della scena finale e il footer. Copy v2 §3.16.
+// COSTRUITA, SPENTA: la home la stampa solo con LETTERE_ATTIVE = true (src/config.ts). Finché le lettere non
+// sono scritte non deve uscire in pagina. Stile e script sono `is:inline` di proposito: così, a interruttore
+// spento, in dist/ non finisce nemmeno una riga di questo file.
+//
+// Prima di accenderla:
+//   1. scrivere le lettere e dire in `riga` quante sono (il numero si scrive solo quando esistono);
+//   2. mettere il secondo webhook in HOOK_LETTERE qui sotto (vuota = modalità prova: nessuna chiamata di rete);
+//   3. avere l'informativa sulla privacy vera.
+// Cosa parte (POST JSON, un invio a parte dal questionario): email, fonte, consenso_lettere: true, inviata_il.
+const HOOK_LETTERE = '';
+const testi = {
+  riga: 'Non è il momento di candidarti? Lasciami la tua email: ti scrivo qualche lettera su come si lavora in Alpha Athlete.',
+  campo: 'La tua email',
+  invio: 'Mandami le lettere',
+  piccolaPrima: 'Ricevi solo queste lettere. Smetti quando vuoi, con un clic.',
+  piccolaLink: 'Informativa sulla privacy',
+  fatto: 'Fatto. La prima lettera arriva a questo indirizzo.',
+  erroreEmail: 'Controlla l’indirizzo: così com’è scritto non arriva.',
+  erroreInvio: 'L’invio non è riuscito. Aspetta un momento e premi di nuovo.',
+};
+---
+<section class="lettere" id="lettere" aria-label="Le lettere di Alpha Athlete">
+  <div class="wrap">
+    <form class="lettere__riga" novalidate data-hook={HOOK_LETTERE} data-fatto={testi.fatto} data-errore-email={testi.erroreEmail} data-errore-invio={testi.erroreInvio}>
+      <p id="lettere-riga">{testi.riga}</p>
+      <label class="sr-only" for="lettere-email">{testi.campo}</label>
+      <input id="lettere-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder={testi.campo} aria-describedby="lettere-riga lettere-esito" required>
+      <button type="submit" class="lettere__invio">{testi.invio}</button>
+    </form>
+    <p class="lettere__piccola">{testi.piccolaPrima} <a href="/privacy/">{testi.piccolaLink}</a>.</p>
+    <p class="lettere__esito" id="lettere-esito" role="status" aria-live="polite"></p>
+  </div>
+</section>
+
+<style is:inline>
+  .lettere { padding: 34px 0 40px; background: var(--bg); text-align: center; color: var(--ink-soft); }
+  .lettere__riga { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 14px; font-size: 16px; }
+  .lettere__riga p { flex: 1 1 100%; max-width: 640px; margin: 0 auto; }
+  .lettere__riga input { flex: 0 1 280px; min-height: 44px; padding: 10px 14px; border-radius: 12px; border: 1.5px solid #9a8c63; background: #fff; font: inherit; font-size: 16px; color: var(--ink); }
+  .lettere__riga input:focus { outline: none; border-color: var(--navy-800); box-shadow: 0 0 0 3px rgba(201, 161, 74, 0.35); }
+  .lettere__riga input[aria-invalid="true"] { border-color: #c0392b; }
+  .lettere__invio { min-height: 44px; padding: 6px 2px; border: 0; background: none; font: inherit; font-weight: 700; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .lettere__invio:disabled { opacity: 0.5; cursor: default; }
+  .lettere__piccola { margin-top: 10px; font-size: 13.5px; color: var(--muted); }
+  .lettere__piccola a { color: var(--ink); text-underline-offset: 3px; }
+  .lettere__esito { margin-top: 10px; min-height: 1.6em; font-size: 14.5px; font-weight: 600; color: var(--ink); }
+  .lettere__esito.is-errore { color: #8a1c12; }
+</style>
+
+<script is:inline>
+  (function () {
+    var f = document.querySelector('.lettere__riga'); if (!f) return;
+    var campo = f.querySelector('input'), btn = f.querySelector('button'), esito = document.getElementById('lettere-esito');
+    var HOOK = f.getAttribute('data-hook') || '';
+    function di(testo, errore) { esito.textContent = testo; esito.classList.toggle('is-errore', !!errore); }
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = (campo.value || '').trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        campo.setAttribute('aria-invalid', 'true'); di(f.getAttribute('data-errore-email'), true); campo.focus(); return;
+      }
+      campo.removeAttribute('aria-invalid');
+      var d = { email: email, fonte: 'alphaathlete.com · lettere', consenso_lettere: true, inviata_il: new Date().toISOString() };
+      function fatto() { di(f.getAttribute('data-fatto')); campo.value = ''; btn.disabled = false; }
+      function fallito() { di(f.getAttribute('data-errore-invio'), true); btn.disabled = false; }
+      btn.disabled = true;
+      if (!HOOK) { console.info('[lettere] modalità prova (HOOK_LETTERE vuota): nessun invio in rete. Payload:', d); fatto(); return; }
+      fetch(HOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); fatto(); })
+        .catch(fallito);
+    });
+  })();
+</script>
