@@ -31,12 +31,12 @@ export const VERSIONE = new Date().toISOString().slice(0, 16).replace(/\D/g, '')
 
 /** Meta del sito (copy v2 §7). La home li usa tutti; le pagine di servizio hanno il loro <title> e, per il resto,
  *  questi. L'immagine per le anteprime dei link è public/assets/og-alpha-athlete.jpg (1200×630), fatta come chiede
- *  il copy v2 §7: Λ e nome, il claim, la riga piccola, il tempio a destra. Sorgente: _non-online/og/og.html. */
+ *  il copy v2 §7: Λ e nome, il claim, la riga piccola, il tempio a destra. Sorgente: grafiche/apertura.html?tipo=og (si rigenera con grafiche/genera.sh og-alpha). */
 export const META = {
   titolo: 'Alpha Athlete · Community per atlete e atleti del digitale',
-  descrizione: 'Community privata per atlete e atleti del digitale. Costruisci un mestiere da freelance in IT e AI, e lavori su di te. Corso a tappe, si entra su candidatura.',
-  ogTitolo: 'Qui alleni il mestiere. E alleni te.',
-  ogDescrizione: 'Alpha Athlete è una community privata con un corso a tappe, per atlete e atleti del digitale. Si entra con una candidatura scritta e un colloquio.',
+  descrizione: 'Community privata per atlete e atleti del digitale. Costruisci un mestiere da freelance AI, e lavori su di te. Percorso a tappe, si entra su candidatura.',
+  ogTitolo: 'Dove gli Atleti costruiscono il loro futuro & il business',
+  ogDescrizione: 'Alpha Athlete è una community privata con un percorso a tappe, per atlete e atleti del digitale. Si entra con una candidatura scritta e un colloquio.',
   ogImmagine: '/assets/og-alpha-athlete.jpg',
   ogImmagineAlt: 'Il tempio di Apollo a Delfi in costruzione, con i robot al lavoro e uno stendardo blu appeso al ponteggio. Sopra, il nome Alpha Athlete.',
 };
