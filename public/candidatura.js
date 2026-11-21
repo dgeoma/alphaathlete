@@ -378,7 +378,7 @@
   /* ---------- avanti, indietro ---------- */
   function porta() {
     var r = root.getBoundingClientRect(), cima = (document.querySelector('.nav') || {}).offsetHeight || 0;
-    /* sul telefono la riga del gruppo («Le sei domande · Passo 5 di 12») va in cima allo schermo a ogni passo */
+    /* sul telefono la riga del gruppo («Le sei domande · Passo 5 di 16») va in cima allo schermo a ogni passo */
     var soglia = innerWidth <= 700 ? cima + 48 : innerHeight * 0.6;
     if (r.top < 60 || r.top > soglia) root.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
   }

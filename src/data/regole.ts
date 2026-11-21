@@ -1,4 +1,4 @@
-// Le regole della casa, in un posto solo: le leggono la home (sezione #regole), la pagina /regole/ e il passo 11
+// Le regole della casa, in un posto solo: le leggono la home (sezione #regole), la pagina /regole/ e il passo delle regole
 // del questionario (`elenco: titoliRegole`). Testi: copy v2 §3.9, incollati così come sono.
 // Per cambiare una regola si cambia QUI, una volta: le tre pagine si aggiornano da sole.
 export interface Regola {

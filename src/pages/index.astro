@@ -1,7 +1,7 @@
 ---
 // HOME di alphaathlete.com. Ordine delle sezioni, id e testi: copy v2 (§2 mappa, §3 copy, §4 tappe, §5 questionario).
 // I testi sono incollati così come sono: per cambiarli si cambia il copy, poi qui.
-//   · regole della casa → src/data/regole.ts (le leggono anche /regole/ e il passo 11 del questionario)
+//   · regole della casa → src/data/regole.ts (le leggono anche /regole/ e il passo delle regole del questionario)
 //   · footer            → src/components/FooterSito.astro
 //   · meta              → src/config.ts (META)
 //   · stili della home  → public/home.css
@@ -53,13 +53,13 @@ const tappe = [
     descrizione: 'La gradinata del tempio. L’ultimo gradino è d’oro e la porta è illuminata. Sopra c’è un robot con la corona d’alloro.' },
 ];
 
-// ---------- §5 · il questionario: dodici schermate ----------
+// ---------- §5 · il questionario: sedici schermate (quattro aggiunte il 21/11/2026, vedi vault 06-LANCIO-PRATICO §3) ----------
 // Schema: README («Il questionario: schema dei dati») e testa di public/candidatura.js.
 // `errori.contatto` manca di proposito: va messo quando esiste un indirizzo che George legge (README, «Prima di pubblicare»).
 const DA_DOVE = 'Da dove parti';
 const SEI = 'Le sei domande';
 const candidatura = {
-  versione: '2026-11-v2',
+  versione: '2026-11-v3',
   intro: 'Niente parte finché non premi «Invia la candidatura». Se ricarichi la pagina, le risposte restano dove sono. Se chiudi la scheda, si riparte dal primo passo. I testi lunghi puoi prepararli nelle note e incollarli.',
   etichette: { facoltativo: 'facoltativo', passo: 'Passo {n} di {tot}' },
   invio: {
@@ -94,6 +94,23 @@ const candidatura = {
         { valore: 'mi_alleno_senza_gare', etichetta: 'Non ho mai fatto gare, ma mi alleno come se le facessi' },
         { valore: 'piu_di_uno', etichetta: 'In più di uno di questi posti' },
       ] },
+    { chiave: 'livello_sport', tipo: 'singola' as const, gruppo: DA_DOVE,
+      titolo: 'Se fai o hai fatto uno sport fisico, a che livello?',
+      aiuto: 'Il livello sportivo non decide chi entra. Mi serve per sapere quanto spazio ha lo sport nella tua settimana.',
+      opzioni: [
+        { valore: 'ricreativo', etichetta: 'Ricreativo' },
+        { valore: 'dilettantistico', etichetta: 'Dilettantistico' },
+        { valore: 'agonistico', etichetta: 'Agonistico' },
+        { valore: 'professionistico', etichetta: 'Professionistico' },
+        { valore: 'fermo', etichetta: 'Sono fermo per un periodo' },
+        { valore: 'ho_smesso', etichetta: 'Ho smesso' },
+        { valore: 'nessuno_sport', etichetta: 'Non faccio sport fisici' },
+      ] },
+    { chiave: 'sport_categoria', tipo: 'testo' as const, gruppo: DA_DOVE, max: 200, obbligatorio: false,
+      titolo: 'Che sport, in che categoria o campionato, e con chi?',
+      segnaposto: 'Calcio, Eccellenza, prima squadra',
+      aiuto: 'Squadra, club o da solo. Se non fai sport fisici, salta.',
+      extra: { chiave: 'obiettivo_sport', etichetta: 'Il tuo obiettivo nello sport', max: 200 } },
     { chiave: 'cosa_fai_per_vivere', tipo: 'testo' as const, gruppo: DA_DOVE, max: 240,
       titolo: 'Che cosa fai oggi per vivere?',
       segnaposto: 'Lavoro nell’ufficio di un’azienda di trasporti',
@@ -116,6 +133,21 @@ const candidatura = {
         { valore: 'da_4_a_6', etichetta: 'Da 4 a 6 ore' },
         { valore: 'piu_di_6', etichetta: 'Più di 6 ore' },
       ] },
+    { chiave: 'fasce_call', tipo: 'multipla' as const, gruppo: DA_DOVE,
+      titolo: 'Quali di queste fasce hai libere per una call di gruppo di 60 minuti? Ora italiana.',
+      aiuto: 'Scegline quante vuoi. Mi serve per fissare la call settimanale nel momento in cui ci siete in più.',
+      opzioni: [
+        { valore: 'feriali_6_7', etichetta: 'Dal lunedì al venerdì, dalle 6 alle 7' },
+        { valore: 'feriali_pranzo', etichetta: 'Dal lunedì al venerdì, in pausa pranzo' },
+        { valore: 'sabato_mattina', etichetta: 'Sabato mattina' },
+        { valore: 'domenica_mattina', etichetta: 'Domenica mattina' },
+        { valore: 'nessuna', etichetta: 'Nessuna di queste (lascia vuote le altre): te lo dico al colloquio' },
+      ] },
+    { chiave: 'letture_mente', tipo: 'testo' as const, gruppo: DA_DOVE, max: 300,
+      titolo: 'Che cosa hai già letto, visto o seguito su mente, prestazione e crescita personale?',
+      segnaposto: 'Libri, film, corsi, mindset, PNL…',
+      aiuto: 'Anche «niente» è una buona risposta: mi serve per sapere da dove parti, non per giudicarti.',
+      extra: { chiave: 'professionista_mente', etichetta: 'Hai mai lavorato con un mental coach o un preparatore mentale? Scrivi «no», oppure con chi. (Percorsi di salute: non scriverli qui.)', max: 200 } },
     { chiave: 'gesto_da_solo', tipo: 'testo_lungo' as const, gruppo: SEI, min: 60, max: 1500,
       sopra: 'Da qui in avanti le domande chiedono di pensarci. Rispondi tu, come parleresti: bastano poche righe, e un testo fatto scrivere a un’AI non mi dice niente di te. Le cose più private tienile per il colloquio, se vorrai.',
       titolo: 'Raccontami una volta in cui il gesto ti è venuto da solo, senza doverci pensare. In una gara, in una disciplina, in un gioco, in un lavoro. Dov’eri, e cosa c’era attorno?',
@@ -461,7 +493,7 @@ const candidatura = {
         <li class="reveal">
           <span class="entra__n" aria-hidden="true">I</span>
           <div><h3><span class="sr-only">1. </span>La candidatura</h3>
-          <p>Dodici schermate, qui sotto: quattro rapide, sei che chiedono di pensarci, poi le regole e i tuoi contatti. Le risposte le leggo io, di persona, una per una. Rispondo a tutte: in quanti giorni, non so dirtelo.</p></div>
+          <p>Sedici schermate, qui sotto: otto rapide, sei che chiedono di pensarci, poi le regole e i tuoi contatti. Le risposte le leggo io, di persona, una per una. Rispondo a tutte: in quanti giorni, non so dirtelo.</p></div>
         </li>
         <li class="reveal" style="--d:.08s">
           <span class="entra__n" aria-hidden="true">II</span>
